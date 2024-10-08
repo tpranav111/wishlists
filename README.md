@@ -27,6 +27,28 @@ These should be copied using a bash shell as follows:
     cp .gitattributes ../<your_repo_folder>/
 ```
 
+# Wishlists Service
+
+This repository contains the Wishlists microservice. Refer to the following sections for the RESTful routes for wishlists and items.
+```
+Endpoint              Methods  Rule
+----------------      -------  -------------------------------------------
+index                  GET      /
+
+list_wishlists         GET      /wishlists
+create_wishlists       POST     /wishlists
+read_wishlists         GET      /wishlists/<wishlist_id>
+update_wishlists       PUT      /wishlists/<wishlist_id>
+delete_wishlists       DELETE   /wishlists/<wishlist_id>
+
+list_items             GET      /wishlists/<int:wishlist_id>/items
+create_items           POST     /wishlists/<wishlist_id>/items
+read_items             GET      /wishlists/<wishlist_id>/items/<item_id>
+update_item            PUT      /wishlists/<wishlist_id>/items/<item_id>
+delete_items           DELETE   /wishlists/<wishlist_id>/items/<item_id>
+```
+The test cases have 95%(or95+) test coverage and can be run with `pytest` (or `make test`)
+
 ## Contents
 
 The project contains the following:
