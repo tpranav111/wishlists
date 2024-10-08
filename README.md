@@ -1,7 +1,7 @@
 # NYU DevOps Project Template
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![made-with-python](https://img.shields.io/badge/Made%20with-Python-red.svg)](https://www.python.org/)![image](https://github.com/user-attachments/assets/72f8bce3-9380-4980-8e1a-3a945b7abaf6)
+[![made-with-python](https://img.shields.io/badge/Made%20with-Python-red.svg)](https://www.python.org/)
 
 This is a skeleton you can use to start your projects
 
