@@ -96,5 +96,5 @@ def index():
 #def update_item(wishlist_id, item_id):
 
 # Delete an item in wishlist
-@app.route("/wishlists/<int:wishlist_id>/items/<int:item_id>", methods=["DELETE"])
-def delete_items(wishlist_id, item_id):
+#@app.route("/wishlists/<int:wishlist_id>/items/<int:item_id>", methods=["DELETE"])
+#def delete_items(wishlist_id, item_id):
