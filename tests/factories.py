@@ -3,18 +3,26 @@ Test Factory to make fake objects for testing
 """
 
 import factory
-from service.models import YourResourceModel
+from faker import Faker
+from service.models import WishList
+
+test = Faker()
 
 
-class YourResourceModelFactory(factory.Factory):
+class WishListFactory(factory.Factory):
     """Creates fake pets that you don't have to feed"""
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Maps factory to data model"""
 
-        model = YourResourceModel
+        model = WishList
 
     id = factory.Sequence(lambda n: n)
-    name = factory.Faker("first_name")
-
-    # Todo: Add your other attributes here...
+    name = factory.Faker("word")
+    product_id = factory.LazyAttribute(lambda _: test.random_int(min=1000, max=9999))
+    product_name = factory.Faker("word")
+    quantity = factory.LazyAttribute(lambda _: test.random_int(min=1, max=100))
+    updated_time = factory.LazyAttribute(
+        lambda _: test.date_time_between(start_date="-5y", end_date="now")
+    )
+    note = factory.Faker("sentence", nb_words=10)

@@ -23,8 +23,8 @@ import os
 import logging
 from unittest import TestCase
 from wsgi import app
-from service.models import YourResourceModel, DataValidationError, db
-from .factories import YourResourceModelFactory
+from service.models import WishList, DataValidationError, db
+from .factories import WishListFactory
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
@@ -32,11 +32,11 @@ DATABASE_URI = os.getenv(
 
 
 ######################################################################
-#  YourResourceModel   M O D E L   T E S T   C A S E S
+#  WishList   M O D E L   T E S T   C A S E S
 ######################################################################
 # pylint: disable=too-many-public-methods
-class TestYourResourceModel(TestCase):
-    """Test Cases for YourResourceModel Model"""
+class TestWishList(TestCase):
+    """Test Cases for WishList Model"""
 
     @classmethod
     def setUpClass(cls):
@@ -54,7 +54,7 @@ class TestYourResourceModel(TestCase):
 
     def setUp(self):
         """This runs before each test"""
-        db.session.query(YourResourceModel).delete()  # clean up the last tests
+        db.session.query(WishList).delete()  # clean up the last tests
         db.session.commit()
 
     def tearDown(self):
@@ -65,15 +65,17 @@ class TestYourResourceModel(TestCase):
     #  T E S T   C A S E S
     ######################################################################
 
-    def test_example_replace_this(self):
-        """It should create a YourResourceModel"""
-        # Todo: Remove this test case example
-        resource = YourResourceModelFactory()
-        resource.create()
-        self.assertIsNotNone(resource.id)
-        found = YourResourceModel.all()
+    def test_create_wishlist(self):
+        """It should create a WishList"""
+        wishlist = WishListFactory()
+        wishlist.create()
+        self.assertIsNotNone(wishlist.id)
+        found = WishList.all()
         self.assertEqual(len(found), 1)
-        data = YourResourceModel.find(resource.id)
-        self.assertEqual(data.name, resource.name)
-
-    # Todo: Add your test cases here...
+        data = WishList.find(wishlist.id)
+        self.assertEqual(data.name, wishlist.name)
+        self.assertEqual(data.product_id, wishlist.product_id)
+        self.assertEqual(data.product_name, wishlist.product_name)
+        self.assertEqual(data.quantity, wishlist.quantity)
+        self.assertEqual(data.updated_time, wishlist.updated_time)
+        self.assertEqual(data.note, wishlist.note)
