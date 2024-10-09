@@ -15,28 +15,39 @@
 ######################################################################
 
 """
-YourResourceModel Service
+Product Wishlist Service
 
 This service implements a REST API that allows you to Create, Read, Update
-and Delete YourResourceModel
+and Delete Wishlist from the inventory of wishlists in the WishlistShop
 """
-
+from datetime import date
 from flask import jsonify, request, url_for, abort
-from flask import current_app as app  # Import Flask application
-from service.models import YourResourceModel
-from service.common import status  # HTTP Status Codes
+from flask import current_app as app                 # Import Flask application
+from service.models.item import Item
+from service.models.wishlist import Wishlist
+from service.common import status                    # HTTP Status Codes
 
-
+######################################################################
+# GET HEALTH CHECK
+######################################################################
+@app.route("/health")
+def health_check():
+    """Let them know our heart is still beating"""
+    return jsonify(status=200, message="Healthy"), status.HTTP_200_OK
+    
 ######################################################################
 # GET INDEX
 ######################################################################
 @app.route("/")
 def index():
     """Root URL response"""
-    return (
-        "Reminder: return some useful information in json format about the service here",
-        status.HTTP_200_OK,
-    )
+    # return (
+    #     """Wishlists REST API Service: The Wishlists service allows users to save items they are 
+    #         interested in but not yet ready to purchase. You can access details about wishlists 
+    #         (/wishlists) and items ((/wishlists/ { wishlist_id }/items)) within each wishlist.""",
+    #     status.HTTP_200_OK,
+    # )
+    return app.send_static_file("index.html")
 
 
 ######################################################################
@@ -44,3 +55,46 @@ def index():
 ######################################################################
 
 # Todo: Place your REST API code here ...
+   
+# List wishlist
+#@app.route("/wishlists", methods=["GET"])
+#def list_wishlists():
+
+# Create wishlist
+#@app.route("/wishlists", methods=["POST"])
+#def create_wishlists():
+
+# Read wishlist
+#@app.route("/wishlists/<int:wishlist_id>", methods=["GET"])
+#def get_wishlists(wishlist_id):
+
+# Update wishlist
+#@app.route("/wishlists/<int:wishlist_id>", methods=["PUT"])
+#def update_wishlists(wishlist_id):
+
+# Delete wishlist
+#@app.route("/wishlists/<int:wishlist_id>", methods=["DELETE"])
+#def delete_wishlists(wishlist_id):
+
+
+
+
+# List an item in wishlist
+#@app.route("/wishlists/<int:wishlist_id>/items", methods=["GET"])
+#def list_items(wishlist_id):
+
+# Create an item in wishlist
+#@app.route("/wishlists/<int:wishlist_id>/items", methods=["POST"])
+#def create_wishlist_items(wishlist_id):
+
+# Read an item in wishlist
+#@app.route("/wishlists/<int:wishlist_id>/items/<int:item_id>", methods=["GET"])
+#def get_items(wishlist_id, item_id):
+
+# Update an item in wishlist
+#@app.route("/wishlists/<int:wishlist_id>/items/<int:item_id>", methods=["PUT"])
+#def update_item(wishlist_id, item_id):
+
+# Delete an item in wishlist
+@app.route("/wishlists/<int:wishlist_id>/items/<int:item_id>", methods=["DELETE"])
+def delete_items(wishlist_id, item_id):
