@@ -23,10 +23,10 @@ and Delete Wishlist from the inventory of wishlists in the WishlistShop
 """
 from datetime import date
 from flask import jsonify, request, url_for, abort
-from flask import current_app as app                 # Import Flask application
-from service.models.wishlist import Wishlist
-from service.models.item import Item
-from service.common import status                    # HTTP Status Codes
+from flask import current_app as app  # Import Flask application
+from service.models import Wishlist
+from service.common import status  # HTTP Status Codes
+
 
 ######################################################################
 # GET HEALTH CHECK
@@ -35,20 +35,21 @@ from service.common import status                    # HTTP Status Codes
 def health_check():
     """Let them know our heart is still beating"""
     return jsonify(status=200, message="Healthy"), status.HTTP_200_OK
-    
+
+
 ######################################################################
 # GET INDEX
 ######################################################################
 @app.route("/")
 def index():
     """Root URL response"""
-    # return (
-    #     """Wishlists REST API Service: The Wishlists service allows users to save items they are 
-    #         interested in but not yet ready to purchase. You can access details about wishlists 
-    #         (/wishlists) and items ((/wishlists/ { wishlist_id }/items)) within each wishlist.""",
-    #     status.HTTP_200_OK,
-    # )
-    return app.send_static_file("index.html")
+    return (
+        """Wishlists REST API Service: The Wishlists service allows users to save items they are
+            interested in but not yet ready to purchase. You can access details about wishlists
+            (/wishlists) and items ((/wishlists/ { wishlist_id }/items)) within each wishlist.""",
+        status.HTTP_200_OK,
+    )
+    # return app.send_static_file("index.html")
 
 
 ######################################################################
@@ -56,46 +57,100 @@ def index():
 ######################################################################
 
 # Todo: Place your REST API code here ...
-   
-# List wishlist
-#@app.route("/wishlists", methods=["GET"])
-#def list_wishlists():
 
-# Create wishlist
-#@app.route("/wishlists", methods=["POST"])
-#def create_wishlists():
+# List wishlist
+# @app.route("/wishlists", methods=["GET"])
+# def list_wishlists():
+
+
+######################################################################
+# CREATE A NEW Wishlist
+######################################################################
+@app.route("/wishlists", methods=["POST"])
+def create_wishlists():
+    """
+    Create a Wishlist
+    This endpoint will create a Wishlist based the data in the body that is posted
+    """
+    app.logger.info("Request to Create a Wishlist...")
+    check_content_type("application/json")
+
+    wishlist = Wishlist()
+    # Get the data from the request and deserialize it
+    data = request.get_json()
+    app.logger.info("Processing: %s", data)
+    wishlist.deserialize(data)
+
+    # Save the new Wishlist to the database
+    wishlist.create()
+    app.logger.info("Wishlist with new id [%s] saved!", wishlist.id)
+
+    # Return the location of the new Wishlist
+    # Todo: uncomment this code when get_wishlists is implemented
+    # location_url = url_for("get_wishlists", wishlist_id=wishlist.id, _external=True)
+    location_url = "unknown"
+    return (
+        jsonify(wishlist.serialize()),
+        status.HTTP_201_CREATED,
+        {"Location": location_url},
+    )
+
 
 # Read wishlist
-#@app.route("/wishlists/<int:wishlist_id>", methods=["GET"])
-#def get_wishlists(wishlist_id):
+# @app.route("/wishlists/<int:wishlist_id>", methods=["GET"])
+# def get_wishlists(wishlist_id):
 
 # Update wishlist
-#@app.route("/wishlists/<int:wishlist_id>", methods=["PUT"])
-#def update_wishlists(wishlist_id):
+# @app.route("/wishlists/<int:wishlist_id>", methods=["PUT"])
+# def update_wishlists(wishlist_id):
 
 # Delete wishlist
-#@app.route("/wishlists/<int:wishlist_id>", methods=["DELETE"])
-#def delete_wishlists(wishlist_id):
-
-
+# @app.route("/wishlists/<int:wishlist_id>", methods=["DELETE"])
+# def delete_wishlists(wishlist_id):
 
 
 # List an item in wishlist
-#@app.route("/wishlists/<int:wishlist_id>/items", methods=["GET"])
-#def list_items(wishlist_id):
+# @app.route("/wishlists/<int:wishlist_id>/items", methods=["GET"])
+# def list_items(wishlist_id):
 
 # Create an item in wishlist
-#@app.route("/wishlists/<int:wishlist_id>/items", methods=["POST"])
-#def create_wishlist_items(wishlist_id):
+# @app.route("/wishlists/<int:wishlist_id>/items", methods=["POST"])
+# def create_wishlist_items(wishlist_id):
 
 # Read an item in wishlist
-#@app.route("/wishlists/<int:wishlist_id>/items/<int:item_id>", methods=["GET"])
-#def get_items(wishlist_id, item_id):
+# @app.route("/wishlists/<int:wishlist_id>/items/<int:item_id>", methods=["GET"])
+# def get_items(wishlist_id, item_id):
 
 # Update an item in wishlist
-#@app.route("/wishlists/<int:wishlist_id>/items/<int:item_id>", methods=["PUT"])
-#def update_item(wishlist_id, item_id):
+# @app.route("/wishlists/<int:wishlist_id>/items/<int:item_id>", methods=["PUT"])
+# def update_item(wishlist_id, item_id):
 
 # Delete an item in wishlist
-#@app.route("/wishlists/<int:wishlist_id>/items/<int:item_id>", methods=["DELETE"])
-#def delete_items(wishlist_id, item_id):
+# @app.route("/wishlists/<int:wishlist_id>/items/<int:item_id>", methods=["DELETE"])
+# def delete_items(wishlist_id, item_id):
+
+######################################################################
+#  U T I L I T Y   F U N C T I O N S
+######################################################################
+
+
+######################################################################
+# Checks the ContentType of a request
+######################################################################
+def check_content_type(content_type) -> None:
+    """Checks that the media type is correct"""
+    if "Content-Type" not in request.headers:
+        app.logger.error("No Content-Type specified.")
+        abort(
+            status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            f"Content-Type must be {content_type}",
+        )
+
+    if request.headers["Content-Type"] == content_type:
+        return
+
+    app.logger.error("Invalid Content-Type: %s", request.headers["Content-Type"])
+    abort(
+        status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+        f"Content-Type must be {content_type}",
+    )

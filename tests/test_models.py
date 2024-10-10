@@ -23,8 +23,8 @@ import os
 import logging
 from unittest import TestCase
 from wsgi import app
-from service.models import WishList, DataValidationError, db
-from .factories import WishListFactory
+from service.models import Wishlist, DataValidationError, db
+from .factories import WishlistFactory
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
@@ -32,11 +32,11 @@ DATABASE_URI = os.getenv(
 
 
 ######################################################################
-#  WishList   M O D E L   T E S T   C A S E S
+#  Wishlist   M O D E L   T E S T   C A S E S
 ######################################################################
 # pylint: disable=too-many-public-methods
-class TestWishList(TestCase):
-    """Test Cases for WishList Model"""
+class TestWishlist(TestCase):
+    """Test Cases for Wishlist Model"""
 
     @classmethod
     def setUpClass(cls):
@@ -54,7 +54,7 @@ class TestWishList(TestCase):
 
     def setUp(self):
         """This runs before each test"""
-        db.session.query(WishList).delete()  # clean up the last tests
+        db.session.query(Wishlist).delete()  # clean up the last tests
         db.session.commit()
 
     def tearDown(self):
@@ -66,13 +66,13 @@ class TestWishList(TestCase):
     ######################################################################
 
     def test_create_wishlist(self):
-        """It should create a WishList"""
-        wishlist = WishListFactory()
+        """It should create a Wishlist"""
+        wishlist = WishlistFactory()
         wishlist.create()
         self.assertIsNotNone(wishlist.id)
-        found = WishList.all()
+        found = Wishlist.all()
         self.assertEqual(len(found), 1)
-        data = WishList.find(wishlist.id)
+        data = Wishlist.find(wishlist.id)
         self.assertEqual(data.name, wishlist.name)
         self.assertEqual(data.product_id, wishlist.product_id)
         self.assertEqual(data.product_name, wishlist.product_name)

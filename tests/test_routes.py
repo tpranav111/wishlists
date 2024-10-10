@@ -15,7 +15,7 @@
 ######################################################################
 
 """
-TestWishList API Service Test Suite
+TestWishlist API Service Test Suite
 """
 
 # pylint: disable=duplicate-code
@@ -24,11 +24,13 @@ import logging
 from unittest import TestCase
 from wsgi import app
 from service.common import status
-from service.models import db, WishList
+from service.models import db, Wishlist
+from .factories import WishlistFactory
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
 )
+BASE_URL = "/wishlists"
 
 
 ######################################################################
@@ -56,7 +58,7 @@ class TestYourResourceService(TestCase):
     def setUp(self):
         """Runs before each test"""
         self.client = app.test_client()
-        db.session.query(WishList).delete()  # clean up the last tests
+        db.session.query(Wishlist).delete()  # clean up the last tests
         db.session.commit()
 
     def tearDown(self):
@@ -72,4 +74,35 @@ class TestYourResourceService(TestCase):
         resp = self.client.get("/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
-    # Todo: Add your test cases here...
+    def test_create_wishlist(self):
+        """It should Create a new Wishlist"""
+        test_wishlist = WishlistFactory()
+        logging.debug("Test Wishlist: %s", test_wishlist.serialize())
+        response = self.client.post(BASE_URL, json=test_wishlist.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Make sure location header is set
+        location = response.headers.get("Location", None)
+        self.assertIsNotNone(location)
+
+        # Check the data is correct
+        new_wishlist = response.get_json()
+        self.assertEqual(new_wishlist["id"], test_wishlist.id)
+        self.assertEqual(new_wishlist["name"], test_wishlist.name)
+        self.assertEqual(new_wishlist["product_id"], test_wishlist.product_id)
+        self.assertEqual(new_wishlist["product_name"], test_wishlist.product_name)
+        self.assertEqual(new_wishlist["quantity"], test_wishlist.quantity)
+        self.assertEqual(new_wishlist["updated_time"], test_wishlist.updated_time)
+        self.assertEqual(new_wishlist["note"], test_wishlist.note)
+        # Todo: Uncomment this code when get_wishlists is implemented
+        # Check that the location header was correct
+        # response = self.client.get(location)
+        # self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # new_wishlist = response.get_json()
+        # self.assertEqual(new_wishlist["name"], test_wishlist.name)
+        # self.assertEqual(new_wishlist["id"], test_wishlist.id)
+        # self.assertEqual(new_wishlist["product_id"], test_wishlist.product_id)
+        # self.assertEqual(new_wishlist["product_name"], test_wishlist.product_name)
+        # self.assertEqual(new_wishlist["quantity"], test_wishlist.quantity)
+        # self.assertEqual(new_wishlist["updated_time"], test_wishlist.updated_time)
+        # self.assertEqual(new_wishlist["note"], test_wishlist.note)

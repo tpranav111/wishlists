@@ -1,5 +1,5 @@
 """
-Models for WishList
+Models for Wishlist
 
 All of the models are stored in this module
 """
@@ -17,9 +17,9 @@ class DataValidationError(Exception):
     """Used for an data validation errors when deserializing"""
 
 
-class WishList(db.Model):
+class Wishlist(db.Model):
     """
-    Class that represents a WishList
+    Class that represents a Wishlist
     """
 
     ##################################################
@@ -34,11 +34,11 @@ class WishList(db.Model):
     note = db.Column(db.String(1000))
 
     def __repr__(self):
-        return f"<WishList {self.name} id=[{self.id}]>"
+        return f"<Wishlist {self.name} id=[{self.id}]>"
 
     def create(self):
         """
-        Creates a WishList to the database
+        Creates a Wishlist to the database
         """
         logger.info("Creating %s", self.name)
         self.id = None  # pylint: disable=invalid-name
@@ -52,7 +52,7 @@ class WishList(db.Model):
 
     def update(self):
         """
-        Updates a WishList to the database
+        Updates a Wishlist to the database
         """
         logger.info("Saving %s", self.name)
         try:
@@ -63,7 +63,7 @@ class WishList(db.Model):
             raise DataValidationError(e) from e
 
     def delete(self):
-        """Removes a WishList from the data store"""
+        """Removes a Wishlist from the data store"""
         logger.info("Deleting %s", self.name)
         try:
             db.session.delete(self)
@@ -74,7 +74,7 @@ class WishList(db.Model):
             raise DataValidationError(e) from e
 
     def serialize(self):
-        """Serializes a WishList into a dictionary"""
+        """Serializes a Wishlist into a dictionary"""
         return {
             "id": self.id,
             "name": self.name,
@@ -87,7 +87,7 @@ class WishList(db.Model):
 
     def deserialize(self, data):
         """
-        Deserializes a WishList from a dictionary
+        Deserializes a Wishlist from a dictionary
 
         Args:
             data (dict): A dictionary containing the resource data
@@ -104,11 +104,11 @@ class WishList(db.Model):
             raise DataValidationError("Invalid attribute: " + error.args[0]) from error
         except KeyError as error:
             raise DataValidationError(
-                "Invalid WishList: missing " + error.args[0]
+                "Invalid Wishlist: missing " + error.args[0]
             ) from error
         except TypeError as error:
             raise DataValidationError(
-                "Invalid WishList: body of request contained bad or no data "
+                "Invalid Wishlist: body of request contained bad or no data "
                 + str(error)
             ) from error
         return self
@@ -119,22 +119,22 @@ class WishList(db.Model):
 
     @classmethod
     def all(cls):
-        """Returns all of the WishLists in the database"""
-        logger.info("Processing all WishLists")
+        """Returns all of the Wishlists in the database"""
+        logger.info("Processing all Wishlists")
         return cls.query.all()
 
     @classmethod
     def find(cls, by_id):
-        """Finds a WishList by it's ID"""
+        """Finds a Wishlist by it's ID"""
         logger.info("Processing lookup for id %s ...", by_id)
         return cls.query.session.get(cls, by_id)
 
     @classmethod
     def find_by_name(cls, name):
-        """Returns all WishLists with the given name
+        """Returns all Wishlists with the given name
 
         Args:
-            name (string): the name of the WishLists you want to match
+            name (string): the name of the Wishlists you want to match
         """
         logger.info("Processing name query for %s ...", name)
         return cls.query.filter(cls.name == name)
