@@ -26,6 +26,7 @@ from wsgi import app
 from service.common import status
 from service.models import db, Wishlist
 from .factories import WishlistFactory
+from datetime import datetime
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
@@ -87,12 +88,18 @@ class TestYourResourceService(TestCase):
 
         # Check the data is correct
         new_wishlist = response.get_json()
+        updated_time_from_response = datetime.strptime(
+            new_wishlist["updated_time"], "%a, %d %b %Y %H:%M:%S GMT"
+        )
         self.assertEqual(new_wishlist["id"], test_wishlist.id)
         self.assertEqual(new_wishlist["name"], test_wishlist.name)
         self.assertEqual(new_wishlist["product_id"], test_wishlist.product_id)
         self.assertEqual(new_wishlist["product_name"], test_wishlist.product_name)
         self.assertEqual(new_wishlist["quantity"], test_wishlist.quantity)
-        self.assertEqual(new_wishlist["updated_time"], test_wishlist.updated_time)
+        self.assertEqual(
+            updated_time_from_response.replace(microsecond=0),
+            test_wishlist.updated_time.replace(microsecond=0),
+        )
         self.assertEqual(new_wishlist["note"], test_wishlist.note)
         # Todo: Uncomment this code when get_wishlists is implemented
         # Check that the location header was correct

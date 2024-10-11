@@ -41,7 +41,7 @@ class Wishlist(db.Model):
         Creates a Wishlist to the database
         """
         logger.info("Creating %s", self.name)
-        self.id = None  # pylint: disable=invalid-name
+        # self.id = None  # pylint: disable=invalid-name
         try:
             db.session.add(self)
             db.session.commit()
@@ -81,7 +81,11 @@ class Wishlist(db.Model):
             "product_id": self.product_id,
             "product_name": self.product_name,
             "quantity": self.quantity,
-            "updated_time": self.updated_time,
+            "updated_time": (
+                self.updated_time.strftime("%a, %d %b %Y %H:%M:%S GMT")
+                if self.updated_time
+                else None
+            ),
             "note": self.note,
         }
 
