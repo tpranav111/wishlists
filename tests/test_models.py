@@ -23,7 +23,7 @@ import os
 import logging
 from unittest import TestCase
 from wsgi import app
-from service.models import Wishlist, DataValidationError, db
+from service.models import Wishlist, db
 from .factories import WishlistFactory
 
 DATABASE_URI = os.getenv(
