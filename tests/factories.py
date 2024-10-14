@@ -4,18 +4,18 @@ Test Factory to make fake objects for testing
 
 import factory
 from faker import Faker
-from service.models import WishList
+from service.models import Wishlist
 
 test = Faker()
 
 
-class WishListFactory(factory.Factory):
+class WishlistFactory(factory.Factory):
     """Creates fake pets that you don't have to feed"""
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Maps factory to data model"""
 
-        model = WishList
+        model = Wishlist
 
     id = factory.Sequence(lambda n: n)
     name = factory.Faker("word")
