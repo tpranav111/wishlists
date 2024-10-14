@@ -23,7 +23,7 @@ import os
 import logging
 from unittest import TestCase
 from wsgi import app
-from service.models import Wishlist, db
+from service.models import Wishlist, Items, db
 from .factories import WishlistFactory
 
 DATABASE_URI = os.getenv(
@@ -54,7 +54,8 @@ class TestWishlist(TestCase):
 
     def setUp(self):
         """This runs before each test"""
-        db.session.query(Wishlist).delete()  # clean up the last tests
+        db.session.query(Wishlist).delete()
+        db.session.query(Items).delete()  # clean up the last tests
         db.session.commit()
 
     def tearDown(self):
@@ -74,8 +75,5 @@ class TestWishlist(TestCase):
         self.assertEqual(len(found), 1)
         data = Wishlist.find(wishlist.id)
         self.assertEqual(data.name, wishlist.name)
-        self.assertEqual(data.product_id, wishlist.product_id)
-        self.assertEqual(data.product_name, wishlist.product_name)
-        self.assertEqual(data.quantity, wishlist.quantity)
         self.assertEqual(data.updated_time, wishlist.updated_time)
         self.assertEqual(data.note, wishlist.note)
