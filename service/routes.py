@@ -136,7 +136,7 @@ def create_items(wishlist_id):
 @app.route("/wishlists/<int:wishlist_id>/items/<int:item_id>", methods=["GET"])
 def get_items(wishlist_id, item_id):
     """
-    Get an Items
+    Get an Item from a Wishlist
 
     This endpoint returns just an item
     """

@@ -67,7 +67,7 @@ class TestWishlist(TestCase):
     #  T E S T   C A S E S
     ######################################################################
     def test_create_items(self):
-        """It should create a new Item"""
+        """It should create a new Item in the Wishlist"""
 
         wishlists = Wishlist.all()
         self.assertEqual(wishlists, [])

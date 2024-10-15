@@ -170,7 +170,7 @@ class TestWishlistService(TestCase):
         self.assertEqual(new_item["name"], item.name, "Address name does not match")
 
     def test_delete_items(self):
-        """It should Delete an Item via API"""
+        """It should Delete an Items"""
         wishlist = self._create_wishlists(1)[0]
         item = ItemsFactory()
         response = self.client.post(
