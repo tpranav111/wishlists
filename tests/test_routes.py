@@ -38,7 +38,7 @@ BASE_URL = "/wishlists"
 #  T E S T   C A S E S
 ######################################################################
 # pylint: disable=too-many-public-methods
-class TestYourResourceService(TestCase):
+class TestWishlistService(TestCase):
     """REST API Server Tests"""
 
     @classmethod

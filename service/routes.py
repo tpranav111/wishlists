@@ -22,9 +22,9 @@ and Delete Wishlist from the inventory of wishlists in the WishlistShop
 
 """
 
-from flask import jsonify, request, abort
+from flask import jsonify, request, abort, url_for
 from flask import current_app as app  # Import Flask application
-from service.models import Wishlist
+from service.models import Wishlist, Items
 from service.common import status  # HTTP Status Codes
 
 
@@ -70,6 +70,7 @@ def index():
 def create_wishlists():
     """
     Create a Wishlist
+
     This endpoint will create a Wishlist based the data in the body that is posted
     """
     app.logger.info("Request to Create a Wishlist...")
@@ -94,6 +95,42 @@ def create_wishlists():
         status.HTTP_201_CREATED,
         {"Location": location_url},
     )
+
+
+@app.route("/wishlists/<int:wishlist_id>/items", methods=["POST"])
+def create_items(wishlist_id):
+    """
+    Create an Item on an Wishlist
+
+    This endpoint will add an item to an wishlist
+    """
+    app.logger.info("Request to create an Item for Wishlist with id: %s", wishlist_id)
+    check_content_type("application/json")
+
+    # See if the wishlist exists and abort if it doesn't
+    wishlist = Wishlist.find(wishlist_id)
+    if not wishlist:
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Wishlist with id '{wishlist_id}' could not be found.",
+        )
+
+    # Create an item from the json data
+    item = Items()
+    item.deserialize(request.get_json())
+
+    # Append the item to the wishlist
+    wishlist.items.append(item)
+    wishlist.update()
+
+    # Prepare a message to return
+    message = item.serialize()
+
+    # Send the location to GET the new item
+    location_url = url_for(
+        "get_items", wishlist_id=wishlist.id, item_id=item.id, _external=True
+    )
+    return jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
 
 
 # Read wishlist
