@@ -125,3 +125,13 @@ class TestWishlist(TestCase):
         wishlist.delete()
         wishlists = Wishlist.all()
         self.assertEqual(len(wishlists), 0)
+
+    def test_find_by_name(self):
+        """It should Find an Wishlist by name"""
+        wishlist = WishlistFactory()
+        wishlist.create()
+
+        # Fetch it back by name
+        same_wishlist = Wishlist.find_by_name(wishlist.name)[0]
+        self.assertEqual(same_wishlist.id, wishlist.id)
+        self.assertEqual(same_wishlist.name, wishlist.name)
