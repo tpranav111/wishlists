@@ -91,7 +91,7 @@ class TestWishlist(TestCase):
         self.assertEqual(len(new_wishlist.items), 2)
         self.assertEqual(new_wishlist.items[1].name, item2.name)
 
-    def test_delete_wishlist_item(self):
+    def test_delete_items(self):
         """It should Delete an item from a Wishlist"""
         wishlist = WishlistFactory()
         item = ItemsFactory(wishlist=wishlist)

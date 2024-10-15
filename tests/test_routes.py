@@ -169,7 +169,6 @@ class TestWishlistService(TestCase):
         new_item = resp.get_json()
         self.assertEqual(new_item["name"], item.name, "Address name does not match")
 
-
     def test_delete_items(self):
         """It should Delete an Items"""
         wishlist = self._create_wishlists(1)[0]
@@ -206,3 +205,13 @@ class TestWishlistService(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         updated_wishlist = response.get_json()
         self.assertEqual(updated_wishlist["name"], "Updated")
+
+    def test_delete_wishlist(self):
+        """It should Delete a Wishlist"""
+        test_wishlist = self._create_wishlists(1)[0]
+        response = self.client.delete(f"{BASE_URL}/{test_wishlist.id}")
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(response.data), 0)
+        # make sure they are deleted
+        response = self.client.get(f"{BASE_URL}/{test_wishlist.id}")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
