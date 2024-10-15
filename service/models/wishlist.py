@@ -57,6 +57,8 @@ class Wishlist(db.Model, PersistentBase):
         """
         Updates a Wishlist to the database
         """
+        if self.id is None:
+            raise DataValidationError("Wishlist does not have an ID. Cannot update.")
         logger.info("Saving %s", self.name)
         try:
             db.session.commit()
