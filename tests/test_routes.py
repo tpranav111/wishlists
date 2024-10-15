@@ -168,3 +168,23 @@ class TestWishlistService(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         new_item = resp.get_json()
         self.assertEqual(new_item["name"], item.name, "Address name does not match")
+
+    def test_delete_items(self):
+        """It should Delete an Item via API"""
+        wishlist = self._create_wishlists(1)[0]
+        item = ItemsFactory()
+        response = self.client.post(
+            f"{BASE_URL}/{wishlist.id}/items",
+            json=item.serialize(),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        item_id = response.get_json()["id"]
+
+        # delete the item and confirm the deletion
+        delete_resp = self.client.delete(f"{BASE_URL}/{wishlist.id}/items/{item_id}")
+        self.assertEqual(delete_resp.status_code, status.HTTP_204_NO_CONTENT)
+
+        get_resp = self.client.get(f"{BASE_URL}/{wishlist.id}/items/{item_id}")
+        self.assertEqual(get_resp.status_code, status.HTTP_404_NOT_FOUND)
