@@ -58,9 +58,16 @@ def index():
 
 # Todo: Place your REST API code here ...
 
+
 # List wishlist
-# @app.route("/wishlists", methods=["GET"])
-# def list_wishlists():
+@app.route("/wishlists", methods=["GET"])
+def list_wishlists():
+    """Return list of all Wishlists"""
+    wls = []
+    wls = Wishlist.all()
+    results = [wl.serialize() for wl in wls]
+    app.logger.info("Returning %d WLs", len(results))
+    return jsonify(results), status.HTTP_200_OK
 
 
 ######################################################################

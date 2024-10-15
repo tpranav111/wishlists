@@ -232,3 +232,14 @@ class TestWishlistService(TestCase):
         """It should not Read an wishlist that is not found"""
         resp = self.client.get(f"{BASE_URL}/0")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    # ----------------------------------------------------------
+    # TEST LIST*
+    # ----------------------------------------------------------
+    def test_get_all_wishlist(self):
+        """It should Get a list of all Wishlists*"""
+        self._create_wishlists(5)
+        response = self.client.get(BASE_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), 5)
