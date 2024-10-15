@@ -189,6 +189,41 @@ class TestWishlistService(TestCase):
         get_resp = self.client.get(f"{BASE_URL}/{wishlist.id}/items/{item_id}")
         self.assertEqual(get_resp.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_add_items(self):
+        """It should Add an item to a wishlist"""
+        wishlist = self._create_wishlists(1)[0]
+        item = ItemsFactory()
+        resp = self.client.post(
+            f"{BASE_URL}/{wishlist.id}/items",
+            json=item.serialize(),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        # Make sure location header is set
+        location = resp.headers.get("Location", None)
+        self.assertIsNotNone(location)
+
+        # Check the data is correct
+        data = resp.get_json()
+        logging.debug(data)
+
+        # The database assign data id automatically, since it is a primary key,
+        # so the item response does not match
+        item.id = data["id"]
+
+        self.assertEqual(data["name"], item.name)
+        self.assertEqual(data["id"], item.id)
+        self.assertEqual(data["wishlist_id"], wishlist.id)
+        self.assertEqual(data["quantity"], item.quantity)
+        self.assertEqual(data["note"], item.note)
+
+        # Check that the location header was correct by getting it
+        resp = self.client.get(location, content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        new_item = resp.get_json()
+        self.assertEqual(new_item["name"], item.name, "Item name does not match")
+
     def test_update_wishlist(self):
         """It should Update an existing Wishlist"""
         # create a wishlist to update
