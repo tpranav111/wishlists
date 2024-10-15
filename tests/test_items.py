@@ -37,7 +37,7 @@ DATABASE_URI = os.getenv(
 ######################################################################
 # pylint: disable=too-many-public-methods
 class TestWishlistService(TestCase):
-    """Address Model Test Cases"""
+    """Items Model Test Cases"""
 
     @classmethod
     def setUpClass(cls):
@@ -77,8 +77,8 @@ class TestWishlistService(TestCase):
         wishlist.create()
         # Assert that it was assigned an id and shows up in the database
         self.assertIsNotNone(wishlist.id)
-        accounts = Wishlist.all()
-        self.assertEqual(len(accounts), 1)
+        wishlists = Wishlist.all()
+        self.assertEqual(len(wishlists), 1)
 
         new_wishlist = Wishlist.find(wishlist.id)
         self.assertEqual(new_wishlist.items[0].name, item.name)

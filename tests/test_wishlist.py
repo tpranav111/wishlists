@@ -65,7 +65,6 @@ class TestWishlist(TestCase):
     ######################################################################
     #  T E S T   C A S E S
     ######################################################################
-
     def test_create_wishlist(self):
         """It should create a Wishlist"""
         wishlist = WishlistFactory()

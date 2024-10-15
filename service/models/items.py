@@ -39,15 +39,15 @@ class Items(db.Model, PersistentBase):
     wishlist_id = db.Column(
         db.Integer, db.ForeignKey("wishlist.id", ondelete="CASCADE"), nullable=False
     )
-    item_name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     note = db.Column(db.String(1000), nullable=True)
 
     def __repr__(self):
-        return f"<Item {self.item_name} in Wishlist {self.wishlist_id}>"
+        return f"<Item {self.name} in Wishlist {self.wishlist_id}>"
 
     def __str__(self):
-        return f"{self.wishlists_id}: {self.item_name}, {self.quantity}, {self.note}"
+        return f"{self.wishlists_id}: {self.name}, {self.quantity}, {self.note}"
 
     def serialize(self):
         """
@@ -56,7 +56,7 @@ class Items(db.Model, PersistentBase):
         return {
             "id": self.id,
             "wishlist_id": self.wishlist_id,
-            "item_name": self.item_name,
+            "name": self.name,
             "quantity": self.quantity,
             "note": self.note,
         }
@@ -66,7 +66,7 @@ class Items(db.Model, PersistentBase):
         Deserializes an Item from a dictionary
         """
         try:
-            self.item_name = data["item_name"]
+            self.name = data["name"]
             self.quantity = data["quantity"]
             self.note = data.get("note", "")
 
