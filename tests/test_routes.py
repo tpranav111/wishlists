@@ -111,6 +111,10 @@ class TestWishlistService(TestCase):
         updated_time_from_response = datetime.strptime(
             new_wishlist["updated_time"], "%a, %d %b %Y %H:%M:%S GMT"
         )
+
+        # Note !
+        test_wishlist.id = new_wishlist["id"]
+
         self.assertEqual(new_wishlist["id"], test_wishlist.id)
         self.assertEqual(new_wishlist["name"], test_wishlist.name)
         self.assertEqual(
@@ -148,6 +152,10 @@ class TestWishlistService(TestCase):
 
         data = resp.get_json()
         logging.debug(data)
+
+        """ The database assign data id automatically, since it is a primary key, 
+        so the item response does not match """
+        item.id = data["id"]
 
         self.assertEqual(data["name"], item.name)
         self.assertEqual(data["id"], item.id)

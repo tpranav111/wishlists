@@ -55,10 +55,10 @@ class Items(db.Model, PersistentBase):
         """
         return {
             "id": self.id,
-            "wishlist_id": self.wishlist_id,
             "name": self.name,
-            "quantity": self.quantity,
             "note": self.note,
+            "quantity": self.quantity,
+            "wishlist_id": self.wishlist_id,
         }
 
     def deserialize(self, data):

@@ -40,4 +40,4 @@ class ItemsFactory(Factory):
     name = Faker("word")
     quantity = LazyAttribute(lambda _: test.random_int(min=1, max=100))
     note = Faker("sentence", nb_words=10)
-    wishlist_id = SubFactory(WishlistFactory)
+    wishlist = SubFactory(WishlistFactory)
