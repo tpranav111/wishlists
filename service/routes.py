@@ -136,7 +136,7 @@ def create_items(wishlist_id):
 @app.route("/wishlists/<int:wishlist_id>/items/<int:item_id>", methods=["GET"])
 def get_items(wishlist_id, item_id):
     """
-    Get an Items
+    Get an Item from a Wishlist
 
     This endpoint returns just an item
     """
@@ -153,6 +153,21 @@ def get_items(wishlist_id, item_id):
         )
 
     return jsonify(item.serialize()), status.HTTP_200_OK
+
+
+@app.route("/wishlists/<int:wishlist_id>/items/<int:item_id>", methods=["DELETE"])
+def delete_items(wishlist_id, item_id):
+    """
+    Delete an Item from a Wishlist
+    """
+    app.logger.info("Deleting Item %s from Wishlist %s", item_id, wishlist_id)
+
+    item = Items.find(item_id)
+    if item:
+        item.delete()
+        app.logger.info("Item %s deleted successfully", item_id)
+
+    return "", status.HTTP_204_NO_CONTENT
 
 
 # Read wishlist
