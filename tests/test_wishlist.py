@@ -66,7 +66,7 @@ class TestWishlist(TestCase):
     ######################################################################
     #  T E S T   C A S E S
     ######################################################################
-    def test_create_wishlist(self):
+    def test_create_a_wishlist(self):
         """It should create a Wishlist"""
         wishlist = WishlistFactory()
         wishlist.create()
@@ -111,3 +111,17 @@ class TestWishlist(TestCase):
         exception_mock.side_effect = Exception()
         wishlist = WishlistFactory()
         self.assertRaises(DataValidationError, wishlist.update)
+
+    def test_delete_a_wishlist(self):
+        """It should Delete a Wishlist"""
+        wishlists = Wishlist.all()
+        self.assertEqual(wishlists, [])
+        wishlist = WishlistFactory()
+        wishlist.create()
+        self.assertIsNotNone(wishlist.id)
+        wishlists = Wishlist.all()
+        self.assertEqual(len(wishlists), 1)
+        wishlist = wishlists[0]
+        wishlist.delete()
+        wishlists = Wishlist.all()
+        self.assertEqual(len(wishlists), 0)
