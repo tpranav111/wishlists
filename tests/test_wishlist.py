@@ -15,7 +15,7 @@
 ######################################################################
 
 """
-Test cases for Pet Model
+Test cases for Wishlist Model
 """
 
 # pylint: disable=duplicate-code
@@ -23,8 +23,9 @@ import os
 import logging
 from unittest import TestCase
 from wsgi import app
-from service.models import Wishlist, Items, db
+from service.models import Wishlist, Items, db, DataValidationError
 from .factories import WishlistFactory
+from unittest.mock import patch
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
@@ -76,3 +77,37 @@ class TestWishlist(TestCase):
         self.assertEqual(data.name, wishlist.name)
         self.assertEqual(data.updated_time, wishlist.updated_time)
         self.assertEqual(data.note, wishlist.note)
+
+    def test_update_a_wishlist(self):
+        """It should Update a Wishlist"""
+        wishlist = WishlistFactory(name="Swimming")
+        logging.debug(wishlist)
+        wishlist.id = None
+        wishlist.create()
+        logging.debug(wishlist)
+        self.assertIsNotNone(wishlist.id)
+        self.assertEqual(wishlist.name, "Swimming")
+        # Change it an save it
+        wishlist = Wishlist.find(wishlist.id)
+        original_id = wishlist.id
+        wishlist.name = "Biking"
+        wishlist.update()
+        # Fetch it back and make sure the id hasn't changed
+        # but the data did change
+        wishlist = Wishlist.find(wishlist.id)
+        self.assertEqual(wishlist.name, "Biking")
+        self.assertEqual(wishlist.id, original_id)
+
+    def test_update_no_id(self):
+        """It should not Update a Wishlist with no id"""
+        wishlist = WishlistFactory()
+        logging.debug(wishlist)
+        wishlist.id = None
+        self.assertRaises(DataValidationError, wishlist.update)
+
+    @patch("service.models.db.session.commit")
+    def test_update_wishlist_failed(self, exception_mock):
+        """It should not update a Wishlist on database error"""
+        exception_mock.side_effect = Exception()
+        wishlist = WishlistFactory()
+        self.assertRaises(DataValidationError, wishlist.update)

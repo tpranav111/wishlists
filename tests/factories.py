@@ -2,9 +2,7 @@
 Test Factory to make fake objects for testing
 """
 
-from datetime import date
 from factory import Factory, SubFactory, Sequence, Faker, LazyAttribute
-from factory.fuzzy import FuzzyChoice, FuzzyDate
 from service.models import Wishlist, Items
 
 from faker import Faker as FK
