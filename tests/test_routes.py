@@ -25,7 +25,7 @@ from unittest import TestCase
 from wsgi import app
 from service.common import status
 from service.models import db, Wishlist
-from .factories import WishlistFactory
+from .factories import WishlistFactory, ItemsFactory
 from datetime import datetime
 
 DATABASE_URI = os.getenv(
@@ -38,7 +38,7 @@ BASE_URL = "/wishlists"
 #  T E S T   C A S E S
 ######################################################################
 # pylint: disable=too-many-public-methods
-class TestYourResourceService(TestCase):
+class TestWishlistService(TestCase):
     """REST API Server Tests"""
 
     @classmethod
@@ -67,6 +67,26 @@ class TestYourResourceService(TestCase):
         db.session.remove()
 
     ######################################################################
+    #  H E L P E R   M E T H O D S
+    ######################################################################
+
+    def _create_wishlists(self, count):
+        """Factory method to create wishlists in bulk"""
+        wishlists = []
+        for _ in range(count):
+            wishlist = WishlistFactory()
+            resp = self.client.post(BASE_URL, json=wishlist.serialize())
+            self.assertEqual(
+                resp.status_code,
+                status.HTTP_201_CREATED,
+                "Could not create test Wishlist",
+            )
+            new_wishlist = resp.get_json()
+            wishlist.id = new_wishlist["id"]
+            wishlists.append(wishlist)
+        return wishlists
+
+    ######################################################################
     #  P L A C E   T E S T   C A S E S   H E R E
     ######################################################################
 
@@ -91,11 +111,12 @@ class TestYourResourceService(TestCase):
         updated_time_from_response = datetime.strptime(
             new_wishlist["updated_time"], "%a, %d %b %Y %H:%M:%S GMT"
         )
+
+        # Note !
+        test_wishlist.id = new_wishlist["id"]
+
         self.assertEqual(new_wishlist["id"], test_wishlist.id)
         self.assertEqual(new_wishlist["name"], test_wishlist.name)
-        self.assertEqual(new_wishlist["product_id"], test_wishlist.product_id)
-        self.assertEqual(new_wishlist["product_name"], test_wishlist.product_name)
-        self.assertEqual(new_wishlist["quantity"], test_wishlist.quantity)
         self.assertEqual(
             updated_time_from_response.replace(microsecond=0),
             test_wishlist.updated_time.replace(microsecond=0),
@@ -108,8 +129,42 @@ class TestYourResourceService(TestCase):
         # new_wishlist = response.get_json()
         # self.assertEqual(new_wishlist["name"], test_wishlist.name)
         # self.assertEqual(new_wishlist["id"], test_wishlist.id)
-        # self.assertEqual(new_wishlist["product_id"], test_wishlist.product_id)
-        # self.assertEqual(new_wishlist["product_name"], test_wishlist.product_name)
+        # self.assertEqual(new_wishlist["item_id"], test_wishlist.item_id)
+        # self.assertEqual(new_wishlist["item_name"], test_wishlist.item_name)
         # self.assertEqual(new_wishlist["quantity"], test_wishlist.quantity)
         # self.assertEqual(new_wishlist["updated_time"], test_wishlist.updated_time)
         # self.assertEqual(new_wishlist["note"], test_wishlist.note)
+
+    def test_create_items(self):
+        """It should Add an item to an wishlist"""
+        wishlist = self._create_wishlists(1)[0]
+        item = ItemsFactory()
+        resp = self.client.post(
+            f"{BASE_URL}/{wishlist.id}/items",
+            json=item.serialize(),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        # Make sure location header is set
+        location = resp.headers.get("Location", None)
+        self.assertIsNotNone(location)
+
+        data = resp.get_json()
+        logging.debug(data)
+
+        """ The database assign data id automatically, since it is a primary key, 
+        so the item response does not match """
+        item.id = data["id"]
+
+        self.assertEqual(data["name"], item.name)
+        self.assertEqual(data["id"], item.id)
+        self.assertEqual(data["wishlist_id"], wishlist.id)
+        self.assertEqual(data["quantity"], item.quantity)
+        self.assertEqual(data["note"], item.note)
+
+        # Check that the location header was correct by getting it
+        resp = self.client.get(location, content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        new_item = resp.get_json()
+        self.assertEqual(new_item["name"], item.name, "Address name does not match")

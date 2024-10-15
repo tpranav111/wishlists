@@ -23,8 +23,9 @@ import os
 import logging
 from unittest import TestCase
 from wsgi import app
-from service.models import Wishlist, db
-from .factories import WishlistFactory
+from service.models import Wishlist, Items, db
+from tests.factories import WishlistFactory, ItemsFactory
+
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
@@ -32,11 +33,11 @@ DATABASE_URI = os.getenv(
 
 
 ######################################################################
-#  Wishlist   M O D E L   T E S T   C A S E S
+#  I T E M S  M O D E L   T E S T   C A S E S
 ######################################################################
 # pylint: disable=too-many-public-methods
 class TestWishlist(TestCase):
-    """Test Cases for Wishlist Model"""
+    """Items Model Test Cases"""
 
     @classmethod
     def setUpClass(cls):
@@ -55,6 +56,7 @@ class TestWishlist(TestCase):
     def setUp(self):
         """This runs before each test"""
         db.session.query(Wishlist).delete()  # clean up the last tests
+        db.session.query(Items).delete()
         db.session.commit()
 
     def tearDown(self):
@@ -64,18 +66,27 @@ class TestWishlist(TestCase):
     ######################################################################
     #  T E S T   C A S E S
     ######################################################################
+    def test_create_items(self):
+        """It should create a new Item"""
 
-    def test_create_wishlist(self):
-        """It should create a Wishlist"""
+        wishlists = Wishlist.all()
+        self.assertEqual(wishlists, [])
         wishlist = WishlistFactory()
+        item = ItemsFactory(wishlist=wishlist)
+        wishlist.items.append(item)
         wishlist.create()
+        # Assert that it was assigned an id and shows up in the database
         self.assertIsNotNone(wishlist.id)
-        found = Wishlist.all()
-        self.assertEqual(len(found), 1)
-        data = Wishlist.find(wishlist.id)
-        self.assertEqual(data.name, wishlist.name)
-        self.assertEqual(data.product_id, wishlist.product_id)
-        self.assertEqual(data.product_name, wishlist.product_name)
-        self.assertEqual(data.quantity, wishlist.quantity)
-        self.assertEqual(data.updated_time, wishlist.updated_time)
-        self.assertEqual(data.note, wishlist.note)
+        wishlists = Wishlist.all()
+        self.assertEqual(len(wishlists), 1)
+
+        new_wishlist = Wishlist.find(wishlist.id)
+        self.assertEqual(new_wishlist.items[0].name, item.name)
+
+        item2 = ItemsFactory(wishlist=wishlist)
+        wishlist.items.append(item2)
+        wishlist.update()
+
+        new_wishlist = Wishlist.find(wishlist.id)
+        self.assertEqual(len(new_wishlist.items), 2)
+        self.assertEqual(new_wishlist.items[1].name, item2.name)

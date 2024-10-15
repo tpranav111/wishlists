@@ -16,6 +16,7 @@
 """
 Flask CLI Command Extensions
 """
+from sqlalchemy import text
 from flask import current_app as app  # Import Flask application
 from service.models import db
 
@@ -34,3 +35,12 @@ def db_create():
     db.drop_all()
     db.create_all()
     db.session.commit()
+
+
+@app.cli.command("db-drop")
+def drop_tables_with_cascade():
+    """Drop tables with CASCADE to remove dependencies"""
+    db.session.execute(text("DROP TABLE IF EXISTS items CASCADE"))
+    db.session.execute(text("DROP TABLE IF EXISTS wishlist CASCADE"))
+    db.session.commit()
+    print("Tables dropped with CASCADE.")

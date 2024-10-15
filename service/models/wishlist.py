@@ -5,19 +5,20 @@ All of the models are stored in this module
 """
 
 import logging
-from flask_sqlalchemy import SQLAlchemy
+from .persistent_base import db, PersistentBase, DataValidationError
+from .items import Items
+
 
 logger = logging.getLogger("flask.app")
 
 # Create the SQLAlchemy object to be initialized later in init_db()
-db = SQLAlchemy()
+
+######################################################################
+#  W I S H L I S T   M O D E L
+######################################################################
 
 
-class DataValidationError(Exception):
-    """Used for an data validation errors when deserializing"""
-
-
-class Wishlist(db.Model):
+class Wishlist(db.Model, PersistentBase):
     """
     Class that represents a Wishlist
     """
@@ -25,13 +26,15 @@ class Wishlist(db.Model):
     ##################################################
     # Table Schema
     ##################################################
+
+    __tablename__ = "wishlist"
+
     id = db.Column(db.Integer, primary_key=True)  # wishlist id
-    name = db.Column(db.String(100))  # wishlist name
-    product_id = db.Column(db.Integer)
-    product_name = db.Column(db.String(100))
-    quantity = db.Column(db.Integer)
-    updated_time = db.Column(db.DateTime)
-    note = db.Column(db.String(1000))
+    name = db.Column(db.String(100), nullable=False)  # wishlist name
+    updated_time = db.Column(db.DateTime, nullable=False)
+    note = db.Column(db.String(1000), nullable=True)
+
+    items = db.relationship("Items", backref="wishlist", passive_deletes=True)
 
     def __repr__(self):
         return f"<Wishlist {self.name} id=[{self.id}]>"
@@ -75,19 +78,17 @@ class Wishlist(db.Model):
 
     def serialize(self):
         """Serializes a Wishlist into a dictionary"""
-        return {
+        wishlist = {
             "id": self.id,
             "name": self.name,
-            "product_id": self.product_id,
-            "product_name": self.product_name,
-            "quantity": self.quantity,
-            "updated_time": (
-                self.updated_time.strftime("%a, %d %b %Y %H:%M:%S GMT")
-                if self.updated_time
-                else None
-            ),
+            "updated_time": (self.updated_time.strftime("%a, %d %b %Y %H:%M:%S GMT")),
             "note": self.note,
+            "items": [],
         }
+        for item in self.items:
+            wishlist["items"].append(item.serialize())
+
+        return wishlist
 
     def deserialize(self, data):
         """
@@ -98,12 +99,15 @@ class Wishlist(db.Model):
         """
         try:
             self.name = data["name"]
-            self.product_id = data["product_id"]
-            self.product_name = data["product_name"]
-            self.quantity = data["quantity"]
             self.updated_time = data["updated_time"]
             self.note = data["note"]
 
+            # handle inner list of addresses
+            item_list = data.get("items")
+            for json_item in item_list:
+                item = Items()
+                item.deserialize(json_item)
+                self.items.append(item)
         except AttributeError as error:
             raise DataValidationError("Invalid attribute: " + error.args[0]) from error
         except KeyError as error:
