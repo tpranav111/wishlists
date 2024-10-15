@@ -136,7 +136,7 @@ def get_wishlists(wishlist_id):
     """
     app.logger.info("Request for Wishlist with id: %s", wishlist_id)
 
-    # See if the account exists and abort if it doesn't
+    # See if the wishlist exists and abort if it doesn't
     wishlist = Wishlist.find(wishlist_id)
     if not wishlist:
         abort(
