@@ -2,15 +2,17 @@
 Test Factory to make fake objects for testing
 """
 
-import factory
-from faker import Faker
-from service.models import Wishlist
-from service.models import Items
+from datetime import date
+from factory import Factory, SubFactory, Sequence, Faker, LazyAttribute
+from factory.fuzzy import FuzzyChoice, FuzzyDate
+from service.models import Wishlist, Items
 
-test = Faker()
+from faker import Faker as FK
+
+test = FK()
 
 
-class WishlistFactory(factory.Factory):
+class WishlistFactory(Factory):
     """Creates fake pets that you don't have to feed"""
 
     class Meta:  # pylint: disable=too-few-public-methods
@@ -18,15 +20,15 @@ class WishlistFactory(factory.Factory):
 
         model = Wishlist
 
-    id = factory.Sequence(lambda n: n)
-    name = factory.Faker("word")
-    updated_time = factory.LazyAttribute(
+    id = Sequence(lambda n: n)
+    name = Faker("word")
+    updated_time = LazyAttribute(
         lambda _: test.date_time_between(start_date="-5y", end_date="now")
     )
-    note = factory.Faker("sentence", nb_words=10)
+    note = Faker("sentence", nb_words=10)
 
 
-class ItemsFactory(factory.Factory):
+class ItemsFactory(Factory):
     """Creates fake pets that you don't have to feed"""
 
     class Meta:  # pylint: disable=too-few-public-methods
@@ -34,12 +36,8 @@ class ItemsFactory(factory.Factory):
 
         model = Items
 
-    id = factory.Sequence(lambda n: n)
-    name = factory.Faker("word")
-    item_id = factory.LazyAttribute(lambda _: test.random_int(min=1000, max=9999))
-    item_name = factory.Faker("word")
-    quantity = factory.LazyAttribute(lambda _: test.random_int(min=1, max=100))
-    updated_time = factory.LazyAttribute(
-        lambda _: test.date_time_between(start_date="-5y", end_date="now")
-    )
-    note = factory.Faker("sentence", nb_words=10)
+    id = Sequence(lambda n: n)
+    name = Faker("word")
+    quantity = LazyAttribute(lambda _: test.random_int(min=1, max=100))
+    note = Faker("sentence", nb_words=10)
+    wishlist_id = SubFactory(WishlistFactory)

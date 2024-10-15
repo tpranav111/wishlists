@@ -90,17 +90,6 @@ class Wishlist(db.Model, PersistentBase):
 
         return wishlist
 
-        return {
-            "id": self.id,
-            "name": self.name,
-            "updated_time": (
-                self.updated_time.strftime("%a, %d %b %Y %H:%M:%S GMT")
-                if self.updated_time
-                else None
-            ),
-            "note": self.note,
-        }
-
     def deserialize(self, data):
         """
         Deserializes a Wishlist from a dictionary

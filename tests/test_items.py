@@ -24,7 +24,7 @@ import logging
 from unittest import TestCase
 from wsgi import app
 from service.models import Wishlist, Items, db
-from tests.factories import ItemsFactory
+from tests.factories import WishlistFactory, ItemsFactory
 
 
 DATABASE_URI = os.getenv(
@@ -36,7 +36,7 @@ DATABASE_URI = os.getenv(
 #  I T E M S  M O D E L   T E S T   C A S E S
 ######################################################################
 # pylint: disable=too-many-public-methods
-class TestItems(TestCase):
+class TestWishlistService(TestCase):
     """Address Model Test Cases"""
 
     @classmethod
@@ -67,16 +67,26 @@ class TestItems(TestCase):
     #  T E S T   C A S E S
     ######################################################################
     def test_create_items(self):
-        """It should create a Wishlist"""
-        items = ItemsFactory()
-        items.create()
-        self.assertIsNotNone(items.id)
-        found = Items.all()
-        self.assertEqual(len(found), 1)
-        data = Items.find(items.id)
-        self.assertEqual(data.name, items.name)
-        self.assertEqual(data.item_id, items.item_id)
-        self.assertEqual(data.item_name, items.item_name)
-        self.assertEqual(data.quantity, items.quantity)
-        self.assertEqual(data.updated_time, items.updated_time)
-        self.assertEqual(data.note, items.note)
+        """It should create a new Item"""
+
+        wishlists = Wishlist.all()
+        self.assertEqual(wishlists, [])
+        wishlist = WishlistFactory()
+        item = ItemsFactory(wishlist=wishlist)
+        wishlist.items.append(item)
+        wishlist.create()
+        # Assert that it was assigned an id and shows up in the database
+        self.assertIsNotNone(wishlist.id)
+        accounts = Wishlist.all()
+        self.assertEqual(len(accounts), 1)
+
+        new_wishlist = Wishlist.find(wishlist.id)
+        self.assertEqual(new_wishlist.items[0].name, item.name)
+
+        item2 = ItemsFactory(wishlist=wishlist)
+        wishlist.items.append(item2)
+        wishlist.update()
+
+        new_wishlist = Wishlist.find(wishlist.id)
+        self.assertEqual(len(new_wishlist.items), 2)
+        self.assertEqual(new_wishlist.items[1].name, item2.name)
