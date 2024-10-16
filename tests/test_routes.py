@@ -274,6 +274,19 @@ class TestWishlistService(TestCase):
         resp = self.client.get(f"{BASE_URL}/0")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_unsupported_media_type(self):
+        """It should not Create when sending unsupported media type"""
+        wishlist = WishlistFactory()
+        resp = self.client.post(
+            BASE_URL, json=wishlist.serialize(), content_type="test/html"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+
+    def test_create_wishlist_no_content_type(self):
+        """It should not Create a Pet with no content type"""
+        response = self.client.post(BASE_URL)
+        self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+
 
     def test_update_wishlist_not_exist(self):
         """It should not Update a Wishlist that does not exist"""
