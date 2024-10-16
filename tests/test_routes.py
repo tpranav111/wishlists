@@ -22,11 +22,12 @@ TestWishlist API Service Test Suite
 import os
 import logging
 from unittest import TestCase
+from datetime import datetime
 from wsgi import app
 from service.common import status
 from service.models import db, Wishlist
 from .factories import WishlistFactory, ItemsFactory
-from datetime import datetime
+
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
@@ -111,6 +112,12 @@ class TestWishlistService(TestCase):
     ######################################################################
     #  P L A C E   T E S T   C A S E S   H E R E
     ######################################################################
+    def test_health(self):
+        """It should get the health endpoint"""
+        resp = self.client.get("/health")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(data["status"], 200)
 
     def test_index(self):
         """It should call the home page"""
@@ -144,18 +151,17 @@ class TestWishlistService(TestCase):
             test_wishlist.updated_time.replace(microsecond=0),
         )
         self.assertEqual(new_wishlist["note"], test_wishlist.note)
-        # Todo: Uncomment this code when get_wishlists is implemented
         # Check that the location header was correct
-        # response = self.client.get(location)
-        # self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # new_wishlist = response.get_json()
-        # self.assertEqual(new_wishlist["name"], test_wishlist.name)
-        # self.assertEqual(new_wishlist["id"], test_wishlist.id)
-        # self.assertEqual(new_wishlist["item_id"], test_wishlist.item_id)
-        # self.assertEqual(new_wishlist["item_name"], test_wishlist.item_name)
-        # self.assertEqual(new_wishlist["quantity"], test_wishlist.quantity)
-        # self.assertEqual(new_wishlist["updated_time"], test_wishlist.updated_time)
-        # self.assertEqual(new_wishlist["note"], test_wishlist.note)
+        response = self.client.get(location)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        new_wishlist = response.get_json()
+        self.assertEqual(new_wishlist["id"], test_wishlist.id)
+        self.assertEqual(new_wishlist["name"], test_wishlist.name)
+        self.assertEqual(
+            updated_time_from_response.replace(microsecond=0),
+            test_wishlist.updated_time.replace(microsecond=0),
+        )
+        self.assertEqual(new_wishlist["note"], test_wishlist.note)
 
     def test_create_items(self):
         """It should Add an item to an wishlist"""
@@ -190,6 +196,19 @@ class TestWishlistService(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         new_item = resp.get_json()
         self.assertEqual(new_item["name"], item.name, "Address name does not match")
+
+    def test_create_items_wishlist_not_found(self):
+        """It should return 404 when the Wishlist is not found"""
+        wishlist = self._create_wishlists(1)[0]
+        item = ItemsFactory()
+        new_wishlist_id = wishlist.id + 1
+        resp = self.client.post(
+            f"{BASE_URL}/{new_wishlist_id}/items",
+            json=item.serialize(),
+            content_type="application/json",
+        )
+        # Assert the response status code is 404 NOT FOUND
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_items(self):
         """It should Delete an Items"""
@@ -287,7 +306,6 @@ class TestWishlistService(TestCase):
         response = self.client.post(BASE_URL)
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
-
     def test_update_wishlist_not_exist(self):
         """It should not Update a Wishlist that does not exist"""
         # create a Wishlist to update
@@ -371,15 +389,13 @@ class TestWishlistService(TestCase):
         )
 
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
-
-        # Update with invalid format for an item
-        new_data = {"name": "Item Name", "quantity": 1.756, "note": "Some note"}
-
+        new_wishlist_id = 99999
         resp = self.client.put(
-            f"{BASE_URL}/{wishlist.id}/items/item_id",
-            json=new_data,
+            f"{BASE_URL}/{new_wishlist_id}/items/{item_id}",
+            json=data,
             content_type="application/json",
         )
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     # ----------------------------------------------------------
     # TEST LIST*
@@ -415,8 +431,21 @@ class TestWishlistService(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
         resp = self.client.get(
-            f"{BASE_URL}/{wishlist.id}", content_type="application/json"
+            f"{BASE_URL}/{wishlist.id}/items",  # Correct endpoint for fetching items
+            content_type="application/json",
         )
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
-        self.assertEqual(len(data["items"]), 1)
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]["name"], item.name)
+
+    def test_data_validation_error(self):
+        """It should return a 400 error for invalid data"""
+        invalid_data = {"invalid_field": "invalid_value"}
+        response = self.client.post(BASE_URL, json=invalid_data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_request_method_not_supported(self):
+        """It should not Accept any requests with unsupported methods"""
+        resp = self.client.post("/", json={}, content_type="application/json")
+        self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)

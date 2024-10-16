@@ -26,7 +26,10 @@ from click.testing import CliRunner
 
 # pylint: disable=unused-import
 from wsgi import app  # noqa: F401
-from service.common.cli_commands import db_create  # noqa: E402
+from service.common.cli_commands import (
+    db_create,
+    drop_tables_with_cascade,
+)  # noqa: E402
 
 
 class TestFlaskCLI(TestCase):
@@ -41,4 +44,13 @@ class TestFlaskCLI(TestCase):
         db_mock.return_value = MagicMock()
         with patch.dict(os.environ, {"FLASK_APP": "wsgi:app"}, clear=True):
             result = self.runner.invoke(db_create)
+            self.assertEqual(result.exit_code, 0)
+
+    @patch("service.common.cli_commands.db")
+    def test_db_drop(self, db_mock):
+        """It should call the db-drop command"""
+        db_mock.session.execute = MagicMock()
+        db_mock.session.commit = MagicMock()
+        with patch.dict(os.environ, {"FLASK_APP": "wsgi:app"}, clear=True):
+            result = self.runner.invoke(drop_tables_with_cascade)
             self.assertEqual(result.exit_code, 0)

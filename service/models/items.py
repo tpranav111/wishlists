@@ -43,12 +43,6 @@ class Items(db.Model, PersistentBase):
     quantity = db.Column(db.Integer, nullable=False)
     note = db.Column(db.String(1000), nullable=True)
 
-    def __repr__(self):
-        return f"<Item {self.name} in Wishlist {self.wishlist_id}>"
-
-    def __str__(self):
-        return f"{self.wishlists_id}: {self.name}, {self.quantity}, {self.note}"
-
     def serialize(self):
         """
         Serializes an Item into a dictionary
@@ -70,8 +64,6 @@ class Items(db.Model, PersistentBase):
             self.quantity = data["quantity"]
             self.note = data.get("note", "")
 
-        except AttributeError as error:
-            raise DataValidationError("Invalid attribute: " + error.args[0]) from error
         except KeyError as error:
             raise DataValidationError(
                 "Invalid Address: missing " + error.args[0]
