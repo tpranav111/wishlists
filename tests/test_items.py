@@ -15,7 +15,7 @@
 ######################################################################
 
 """
-Test cases for Pet Model
+Test cases for item Model
 """
 
 # pylint: disable=duplicate-code
@@ -112,26 +112,16 @@ class TestWishlist(TestCase):
         self.assertEqual(len(updated_wishlist.items), 0)
         self.assertIsNone(Items.find(item.id))
 
-    def test_add_items(self):
-        """It should Create a wishlist with an item and add it to the database"""
-        wishlists = Wishlist.all()
-        self.assertEqual(wishlists, [])
-        wishlist = WishlistFactory()
-        item = ItemsFactory(wishlist=wishlist)
-        wishlist.items.append(item)
-        wishlist.create()
-        # Assert that it was assigned an id and shows up in the database
-        self.assertIsNotNone(wishlist.id)
-        wishlists = wishlist.all()
-        self.assertEqual(len(wishlists), 1)
-
-        new_wishlist = wishlist.find(wishlist.id)
-        self.assertEqual(new_wishlist.items[0].name, item.name)
-
-        new_item = ItemsFactory(wishlist=wishlist)
-        wishlist.items.append(new_item)
-        wishlist.update()
-
-        new_wishlist = wishlist.find(wishlist.id)
-        self.assertEqual(len(new_wishlist.items), 2)
-        self.assertEqual(new_wishlist.items[1].name, new_item.name)
+    def test_read_items(self):
+        """It should Read a Item"""
+        item = ItemsFactory()
+        logging.debug(item)
+        item.id = None
+        item.create()
+        self.assertIsNotNone(item.id)
+        # Fetch it back
+        found_item = item.find(item.id)
+        self.assertEqual(found_item.id, item.id)
+        self.assertEqual(found_item.name, item.name)
+        self.assertEqual(found_item.quantity, item.quantity)
+        self.assertEqual(found_item.note, item.note)

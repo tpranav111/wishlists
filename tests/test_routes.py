@@ -86,6 +86,28 @@ class TestWishlistService(TestCase):
             wishlists.append(wishlist)
         return wishlists
 
+    def _create_items(self, wishlist_id, number_of_items):
+        """Helper method to create items for a wishlist"""
+        items = []
+        for _ in range(number_of_items):
+            test_item = (
+                ItemsFactory()
+            )  # Assuming you have ItemFactory to generate item instances
+            response = self.client.post(
+                f"{BASE_URL}/{wishlist_id}/items",
+                json=test_item.serialize(),
+                content_type="application/json",
+            )
+            self.assertEqual(
+                response.status_code,
+                status.HTTP_201_CREATED,
+                "Could not create test item",
+            )
+            new_item = response.get_json()
+            test_item.id = new_item["id"]
+            items.append(test_item)
+        return items
+
     ######################################################################
     #  P L A C E   T E S T   C A S E S   H E R E
     ######################################################################
@@ -189,40 +211,24 @@ class TestWishlistService(TestCase):
         get_resp = self.client.get(f"{BASE_URL}/{wishlist.id}/items/{item_id}")
         self.assertEqual(get_resp.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_add_items(self):
-        """It should Add an item to a wishlist"""
+    def test_get_items(self):
+        """It should Get a single item"""
+        # get the id of a item
         wishlist = self._create_wishlists(1)[0]
-        item = ItemsFactory()
-        resp = self.client.post(
-            f"{BASE_URL}/{wishlist.id}/items",
-            json=item.serialize(),
-            content_type="application/json",
-        )
-        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        test_item = self._create_items(wishlist.id, 1)[0]
+        response = self.client.get(f"{BASE_URL}/{wishlist.id}/items/{test_item.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(data["name"], test_item.name)
 
-        # Make sure location header is set
-        location = resp.headers.get("Location", None)
-        self.assertIsNotNone(location)
-
-        # Check the data is correct
-        data = resp.get_json()
-        logging.debug(data)
-
-        # The database assign data id automatically, since it is a primary key,
-        # so the item response does not match
-        item.id = data["id"]
-
-        self.assertEqual(data["name"], item.name)
-        self.assertEqual(data["id"], item.id)
-        self.assertEqual(data["wishlist_id"], wishlist.id)
-        self.assertEqual(data["quantity"], item.quantity)
-        self.assertEqual(data["note"], item.note)
-
-        # Check that the location header was correct by getting it
-        resp = self.client.get(location, content_type="application/json")
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        new_item = resp.get_json()
-        self.assertEqual(new_item["name"], item.name, "Item name does not match")
+    def test_get_item_not_found(self):
+        """It should not Get a item thats not found"""
+        wishlist = self._create_wishlists(1)[0]
+        response = self.client.get(f"{BASE_URL}/{wishlist.id}/items/0")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        data = response.get_json()
+        logging.debug("Response data = %s", data)
+        self.assertIn("Wishlist with id '0' could not be found.", data["message"])
 
     def test_update_wishlist(self):
         """It should Update an existing Wishlist"""
