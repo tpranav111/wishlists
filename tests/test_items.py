@@ -15,7 +15,7 @@
 ######################################################################
 
 """
-Test cases for Pet Model
+Test cases for item Model
 """
 
 # pylint: disable=duplicate-code
@@ -153,3 +153,17 @@ class TestWishlist(TestCase):
         old_item.quantity = "invalid"
         with self.assertRaises(DataValidationError):
             wishlist.update()
+            
+    def test_read_items(self):
+        """It should Read a Item"""
+        item = ItemsFactory()
+        logging.debug(item)
+        item.id = None
+        item.create()
+        self.assertIsNotNone(item.id)
+        # Fetch it back
+        found_item = item.find(item.id)
+        self.assertEqual(found_item.id, item.id)
+        self.assertEqual(found_item.name, item.name)
+        self.assertEqual(found_item.quantity, item.quantity)
+        self.assertEqual(found_item.note, item.note)
