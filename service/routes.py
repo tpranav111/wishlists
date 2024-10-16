@@ -56,8 +56,6 @@ def index():
 #  R E S T   A P I   E N D P O I N T S
 ######################################################################
 
-# Todo: Place your REST API code here ...
-
 
 # List wishlist
 @app.route("/wishlists", methods=["GET"])
@@ -93,10 +91,8 @@ def create_wishlists():
     wishlist.create()
     app.logger.info("Wishlist with new id [%s] saved!", wishlist.id)
 
-    # Return the location of the new Wishlist
-    # Todo: uncomment this code when get_wishlists is implemented
-    # location_url = url_for("get_wishlists", wishlist_id=wishlist.id, _external=True)
-    location_url = "unknown"
+    location_url = url_for("get_wishlists", wishlist_id=wishlist.id, _external=True)
+
     return (
         jsonify(wishlist.serialize()),
         status.HTTP_201_CREATED,
@@ -169,7 +165,7 @@ def delete_wishlists(wishlist_id):
     wishlist = Wishlist.find(wishlist_id)
     if wishlist:
         wishlist.delete()
-        return "", status.HTTP_204_NO_CONTENT
+    return "", status.HTTP_204_NO_CONTENT
 
 
 ######################################################################
@@ -257,12 +253,10 @@ def update_item(wishlist_id, item_id):
 
     This endpoint will update an Item based on the body that is posted
     """
-    # Find the wishlist by ID
     wishlist = Wishlist.find(wishlist_id)
     if not wishlist:
         abort(404, description=f"Wishlist with id '{wishlist_id}' was not found.")
 
-    # Find the item by ID
     item = Items.find(item_id)
     if not item or item.wishlist_id != wishlist_id:
         abort(
@@ -270,51 +264,11 @@ def update_item(wishlist_id, item_id):
             description=f"Item with id '{item_id}' was not found in wishlist '{wishlist_id}'.",
         )
 
-    # Get the request payload
     data = request.get_json()
-    # Deserialize the data to update the item
-    try:
-        item.deserialize(data)  # Assuming deserialize properly updates the item fields
-        item.update()  # Save the updated item to the database
-    except Exception as e:
-        abort(400, description=f"Error updating item: {str(e)}")
-
-    # Return the updated item in the response
+    item.deserialize(data)
+    item.update()
     return jsonify(item.serialize()), 200
 
-
-# Read wishlist
-# @app.route("/wishlists/<int:wishlist_id>", methods=["GET"])
-# def get_wishlists(wishlist_id):
-
-# Update wishlist
-# @app.route("/wishlists/<int:wishlist_id>", methods=["PUT"])
-# def update_wishlists(wishlist_id):
-
-# Delete wishlist
-# @app.route("/wishlists/<int:wishlist_id>", methods=["DELETE"])
-# def delete_wishlists(wishlist_id):
-
-
-# List an item in wishlist
-# @app.route("/wishlists/<int:wishlist_id>/items", methods=["GET"])
-# def list_items(wishlist_id):
-
-# Create an item in wishlist
-# @app.route("/wishlists/<int:wishlist_id>/items", methods=["POST"])
-# def create_wishlist_items(wishlist_id):
-
-# Read an item in wishlist
-# @app.route("/wishlists/<int:wishlist_id>/items/<int:item_id>", methods=["GET"])
-# def get_items(wishlist_id, item_id):
-
-# Update an item in wishlist
-# @app.route("/wishlists/<int:wishlist_id>/items/<int:item_id>", methods=["PUT"])
-# def update_item(wishlist_id, item_id):
-
-# Delete an item in wishlist
-# @app.route("/wishlists/<int:wishlist_id>/items/<int:item_id>", methods=["DELETE"])
-# def delete_items(wishlist_id, item_id):
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S

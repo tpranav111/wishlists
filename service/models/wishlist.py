@@ -39,45 +39,6 @@ class Wishlist(db.Model, PersistentBase):
     def __repr__(self):
         return f"<Wishlist {self.name} id=[{self.id}]>"
 
-    def create(self):
-        """
-        Creates a Wishlist to the database
-        """
-        logger.info("Creating %s", self.name)
-        # self.id = None  # pylint: disable=invalid-name
-        try:
-            db.session.add(self)
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            logger.error("Error creating record: %s", self)
-            raise DataValidationError(e) from e
-
-    def update(self):
-        """
-        Updates a Wishlist to the database
-        """
-        if self.id is None:
-            raise DataValidationError("Wishlist does not have an ID. Cannot update.")
-        logger.info("Saving %s", self.name)
-        try:
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            logger.error("Error updating record: %s", self)
-            raise DataValidationError(e) from e
-
-    def delete(self):
-        """Removes a Wishlist from the data store"""
-        logger.info("Deleting %s", self.name)
-        try:
-            db.session.delete(self)
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            logger.error("Error deleting record: %s", self)
-            raise DataValidationError(e) from e
-
     def serialize(self):
         """Serializes a Wishlist into a dictionary"""
         wishlist = {
@@ -110,8 +71,6 @@ class Wishlist(db.Model, PersistentBase):
                 item = Items()
                 item.deserialize(json_item)
                 self.items.append(item)
-        except AttributeError as error:
-            raise DataValidationError("Invalid attribute: " + error.args[0]) from error
         except KeyError as error:
             raise DataValidationError(
                 "Invalid Wishlist: missing " + error.args[0]

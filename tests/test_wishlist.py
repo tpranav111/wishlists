@@ -22,10 +22,11 @@ Test cases for Wishlist Model
 import os
 import logging
 from unittest import TestCase
+from unittest.mock import patch
 from wsgi import app
 from service.models import Wishlist, Items, db, DataValidationError
 from .factories import WishlistFactory
-from unittest.mock import patch
+
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
@@ -78,6 +79,24 @@ class TestWishlist(TestCase):
         self.assertEqual(data.updated_time, wishlist.updated_time)
         self.assertEqual(data.note, wishlist.note)
 
+    @patch("service.models.db.session.commit")
+    def test_create_a_wishlist_failed(self, exception_mock):
+        """It should not create an Wishlist on database error"""
+        exception_mock.side_effect = Exception()
+        wishlist = WishlistFactory()
+        self.assertRaises(DataValidationError, wishlist.create)
+
+    def test_create_wishlist_with_null_name(self):
+        """It should fail to create a Wishlist with a null name and raise DataValidationError"""
+        test_wishlist = WishlistFactory()
+        test_wishlist.name = None
+        with self.assertRaises(DataValidationError) as context:
+            test_wishlist.create()
+        self.assertIn("null value in column", str(context.exception))
+        self.assertIn("violates not-null constraint", str(context.exception))
+        result = Wishlist.query.filter_by(name=None).first()
+        self.assertIsNone(result)
+
     def test_update_a_wishlist(self):
         """It should Update a Wishlist"""
         wishlist = WishlistFactory(name="Swimming")
@@ -126,6 +145,13 @@ class TestWishlist(TestCase):
         wishlists = Wishlist.all()
         self.assertEqual(len(wishlists), 0)
 
+    @patch("service.models.db.session.commit")
+    def test_delete_a_wishlist_failed(self, exception_mock):
+        """It should not delete an Wishlist on database error"""
+        exception_mock.side_effect = Exception()
+        wishlist = WishlistFactory()
+        self.assertRaises(DataValidationError, wishlist.delete)
+
     def test_find_by_name(self):
         """It should Find an Wishlist by name"""
         wishlist = WishlistFactory()
@@ -145,3 +171,28 @@ class TestWishlist(TestCase):
         """It should not Deserialize a wishlist with a TypeError"""
         wishlist = Wishlist()
         self.assertRaises(DataValidationError, wishlist.deserialize, [])
+
+    def test_deserialize_valid_items(self):
+        """It should correctly deserialize a Wishlist with valid items"""
+        data = {
+            "name": "My Wishlist",
+            "updated_time": "2024-01-01 12:00:00",
+            "note": "This is a sample note",
+            "items": [
+                {"name": "Item 1", "quantity": 2},
+                {"name": "Item 2", "quantity": 5},
+            ],
+        }
+        wishlist = WishlistFactory()
+        wishlist.deserialize(data)
+
+        # Check if the wishlist attributes are correctly deserialized
+        self.assertEqual(wishlist.name, data["name"])
+        self.assertEqual(wishlist.note, data["note"])
+        self.assertEqual(len(wishlist.items), 2)  # Two items should be deserialized
+
+        # Check if each item is correctly deserialized
+        self.assertEqual(wishlist.items[0].name, "Item 1")
+        self.assertEqual(wishlist.items[0].quantity, 2)
+        self.assertEqual(wishlist.items[1].name, "Item 2")
+        self.assertEqual(wishlist.items[1].quantity, 5)
