@@ -431,11 +431,13 @@ class TestWishlistService(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
         resp = self.client.get(
-            f"{BASE_URL}/{wishlist.id}", content_type="application/json"
+            f"{BASE_URL}/{wishlist.id}/items",  # Correct endpoint for fetching items
+            content_type="application/json",
         )
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
-        self.assertEqual(len(data["items"]), 1)
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]["name"], item.name)
 
     def test_data_validation_error(self):
         """It should return a 400 error for invalid data"""
