@@ -15,7 +15,7 @@
 ######################################################################
 
 """
-Test cases for Pet Model
+Test cases for item Model
 """
 
 # pylint: disable=duplicate-code
@@ -23,7 +23,7 @@ import os
 import logging
 from unittest import TestCase
 from wsgi import app
-from service.models import Wishlist, Items, db
+from service.models import Wishlist, Items, db, DataValidationError
 from tests.factories import WishlistFactory, ItemsFactory
 
 
@@ -111,3 +111,59 @@ class TestWishlist(TestCase):
         updated_wishlist = Wishlist.find(wishlist.id)
         self.assertEqual(len(updated_wishlist.items), 0)
         self.assertIsNone(Items.find(item.id))
+
+    def test_update_wishlist_item(self):
+        """It should Update a Wishlist Item"""
+        wishlists = Wishlist.all()
+        self.assertEqual(wishlists, [])
+        wishlist = WishlistFactory()
+        item = ItemsFactory(wishlist=wishlist)
+        wishlist.items.append(item)
+        wishlist.create()
+        # Assert that it was assigned an id and shows up in the database
+        self.assertIsNotNone(wishlist.id)
+        wishlists = Wishlist.all()
+        self.assertEqual(len(wishlists), 1)
+
+        # Fetch it back
+        wishlist = Wishlist.find(wishlist.id)
+        old_item = wishlist.items[0]
+        self.assertEqual(old_item.note, item.note)
+        # Change the note
+        old_item.note = "Updated"
+        old_item.quantity = 7
+        wishlist.update()
+
+        # Fetch it back again
+        wishlist = Wishlist.find(wishlist.id)
+        item = wishlist.items[0]
+        self.assertEqual(item.note, "Updated")
+        self.assertEqual(item.quantity, 7)
+
+    def test_update_wishlist_item_invalid_quantity(self):
+        """It should fail to Update a Wishlist Item with invalid quantity type"""
+        wishlist = WishlistFactory()
+        item = ItemsFactory(wishlist=wishlist)
+        wishlist.items.append(item)
+        wishlist.create()
+        self.assertIsNotNone(wishlist.id)
+        wishlist = Wishlist.find(wishlist.id)
+        old_item = wishlist.items[0]
+        old_item.note = "Updated"
+        old_item.quantity = "invalid"
+        with self.assertRaises(DataValidationError):
+            wishlist.update()
+            
+    def test_read_items(self):
+        """It should Read a Item"""
+        item = ItemsFactory()
+        logging.debug(item)
+        item.id = None
+        item.create()
+        self.assertIsNotNone(item.id)
+        # Fetch it back
+        found_item = item.find(item.id)
+        self.assertEqual(found_item.id, item.id)
+        self.assertEqual(found_item.name, item.name)
+        self.assertEqual(found_item.quantity, item.quantity)
+        self.assertEqual(found_item.note, item.note)

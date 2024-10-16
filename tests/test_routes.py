@@ -86,6 +86,28 @@ class TestWishlistService(TestCase):
             wishlists.append(wishlist)
         return wishlists
 
+    def _create_items(self, wishlist_id, number_of_items):
+        """Helper method to create items for a wishlist"""
+        items = []
+        for _ in range(number_of_items):
+            test_item = (
+                ItemsFactory()
+            )  # Assuming you have ItemFactory to generate item instances
+            response = self.client.post(
+                f"{BASE_URL}/{wishlist_id}/items",
+                json=test_item.serialize(),
+                content_type="application/json",
+            )
+            self.assertEqual(
+                response.status_code,
+                status.HTTP_201_CREATED,
+                "Could not create test item",
+            )
+            new_item = response.get_json()
+            test_item.id = new_item["id"]
+            items.append(test_item)
+        return items
+
     ######################################################################
     #  P L A C E   T E S T   C A S E S   H E R E
     ######################################################################
@@ -189,6 +211,25 @@ class TestWishlistService(TestCase):
         get_resp = self.client.get(f"{BASE_URL}/{wishlist.id}/items/{item_id}")
         self.assertEqual(get_resp.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_get_items(self):
+        """It should Get a single item"""
+        # get the id of a item
+        wishlist = self._create_wishlists(1)[0]
+        test_item = self._create_items(wishlist.id, 1)[0]
+        response = self.client.get(f"{BASE_URL}/{wishlist.id}/items/{test_item.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(data["name"], test_item.name)
+
+    def test_get_item_not_found(self):
+        """It should not Get a item thats not found"""
+        wishlist = self._create_wishlists(1)[0]
+        response = self.client.get(f"{BASE_URL}/{wishlist.id}/items/0")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        data = response.get_json()
+        logging.debug("Response data = %s", data)
+        self.assertIn("Wishlist with id '0' could not be found.", data["message"])
+
     def test_update_wishlist(self):
         """It should Update an existing Wishlist"""
         # create a wishlist to update
@@ -245,3 +286,108 @@ class TestWishlistService(TestCase):
         """It should not Create a Pet with no content type"""
         response = self.client.post(BASE_URL)
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+
+
+    def test_update_wishlist_not_exist(self):
+        """It should not Update a Wishlist that does not exist"""
+        # create a Wishlist to update
+        test_wishlist = WishlistFactory()
+        resp = self.client.post(BASE_URL, json=test_wishlist.serialize())
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        # update the wishlist
+        new_wishlist = resp.get_json()
+        logging.debug(new_wishlist)
+        new_wishlist["name"] = "Updated"
+        new_wishlist_id = 99999
+        resp = self.client.put(f"{BASE_URL}/{new_wishlist_id}", json=new_wishlist)
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+        negative_wishlist_id = -1
+        resp = self.client.put(f"{BASE_URL}/{negative_wishlist_id}", json=new_wishlist)
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+        invalid_wishlist_id = "asdasdadqwe"
+        resp = self.client.put(f"{BASE_URL}/{invalid_wishlist_id}", json=new_wishlist)
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_wishlist_item(self):
+        """It should Update a wishlist item in a wishlist"""
+        # create a known wishlist and wishlist item
+        wishlist = self._create_wishlists(1)[0]
+        item = ItemsFactory()
+        resp = self.client.post(
+            f"{BASE_URL}/{wishlist.id}/items",
+            json=item.serialize(),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        data = resp.get_json()
+        logging.debug(data)
+        item_id = data["id"]
+        data["note"] = "Updated"
+
+        resp = self.client.put(
+            f"{BASE_URL}/{wishlist.id}/items/{item_id}",
+            json=data,
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+        resp = self.client.get(
+            f"{BASE_URL}/{wishlist.id}/items/{item_id}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+        data = resp.get_json()
+        logging.debug(data)
+        self.assertEqual(data["id"], item_id)
+        self.assertEqual(data["wishlist_id"], wishlist.id)
+        self.assertEqual(data["note"], "Updated")
+
+    def test_update_wishlist_item_not_exist(self):
+        """It should not Update a wishlist item that does not exist"""
+        wishlist = self._create_wishlists(1)[0]
+        item = ItemsFactory()
+        resp = self.client.post(
+            f"{BASE_URL}/{wishlist.id}/items",
+            json=item.serialize(),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        data = resp.get_json()
+        logging.debug(data)
+        item_id = data["id"]
+        # Update an item doesn't belongs to that wishlist
+        new_item_id = item_id + 1
+        data["note"] = "Updated"
+        resp = self.client.put(
+            f"{BASE_URL}/{wishlist.id}/items/{new_item_id}",
+            json=data,
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+        # Update with invalid format for an item
+        new_data = {"name": "Item Name", "quantity": 1.756, "note": "Some note"}
+
+        resp = self.client.put(
+            f"{BASE_URL}/{wishlist.id}/items/item_id",
+            json=new_data,
+            content_type="application/json",
+        )
+
+    # ----------------------------------------------------------
+    # TEST LIST*
+    # ----------------------------------------------------------
+    def test_get_all_wishlist(self):
+        """It should Get a list of all Wishlists*"""
+        self._create_wishlists(5)
+        response = self.client.get(BASE_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), 5)
