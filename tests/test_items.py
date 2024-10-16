@@ -153,7 +153,7 @@ class TestWishlist(TestCase):
         old_item.quantity = "invalid"
         with self.assertRaises(DataValidationError):
             wishlist.update()
-            
+
     def test_read_items(self):
         """It should Read a Item"""
         item = ItemsFactory()
@@ -167,3 +167,13 @@ class TestWishlist(TestCase):
         self.assertEqual(found_item.name, item.name)
         self.assertEqual(found_item.quantity, item.quantity)
         self.assertEqual(found_item.note, item.note)
+
+    def test_deserialize_item_key_error(self):
+        """It should not Deserialize an item with a KeyError"""
+        item = Items()
+        self.assertRaises(DataValidationError, item.deserialize, {})
+
+    def test_deserialize_item_type_error(self):
+        """It should not Deserialize an item with a TypeError"""
+        item = Items()
+        self.assertRaises(DataValidationError, item.deserialize, [])
