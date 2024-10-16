@@ -341,3 +341,19 @@ def check_content_type(content_type) -> None:
         status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
         f"Content-Type must be {content_type}",
     )
+
+
+##
+@app.route("/wishlists/<int:wishlist_id>/items", methods=["GET"])
+def get_all_items(wishlist_id):
+    """
+    Get all Items in WL
+    """
+    wishlist = Wishlist.find(wishlist_id)
+    if not wishlist:
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Wishlist with id '{wishlist_id}' could not be found.",
+        )
+
+    return jsonify(wishlist.serialize()["items"]), status.HTTP_200_OK
