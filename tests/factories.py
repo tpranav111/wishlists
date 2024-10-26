@@ -37,5 +37,6 @@ class ItemsFactory(Factory):
     id = Sequence(lambda n: n)
     name = Faker("word")
     quantity = LazyAttribute(lambda _: test.random_int(min=1, max=100))
+    category = Faker("word")  # category
     note = Faker("sentence", nb_words=10)
     wishlist = SubFactory(WishlistFactory)

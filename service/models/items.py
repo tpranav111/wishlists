@@ -42,6 +42,7 @@ class Items(db.Model, PersistentBase):
     name = db.Column(db.String(100), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     note = db.Column(db.String(1000), nullable=True)
+    category = db.Column(db.String(100), nullable=False)  # category
 
     def serialize(self):
         """
@@ -51,6 +52,7 @@ class Items(db.Model, PersistentBase):
             "id": self.id,
             "name": self.name,
             "note": self.note,
+            "category": self.category,
             "quantity": self.quantity,
             "wishlist_id": self.wishlist_id,
         }
@@ -62,6 +64,7 @@ class Items(db.Model, PersistentBase):
         try:
             self.name = data["name"]
             self.quantity = data["quantity"]
+            self.category = data["category"]
             self.note = data.get("note", "")
 
         except KeyError as error:
