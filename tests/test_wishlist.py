@@ -174,6 +174,7 @@ class TestWishlist(TestCase):
 
     def test_deserialize_valid_items(self):
         """It should correctly deserialize a Wishlist with valid items"""
+        # add category
         data = {
             "name": "My Wishlist",
             "updated_time": "2024-01-01 12:00:00",

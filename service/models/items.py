@@ -42,7 +42,7 @@ class Items(db.Model, PersistentBase):
     name = db.Column(db.String(100), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     note = db.Column(db.String(1000), nullable=True)
-    category = db.Column(db.String(100), nullable=False)
+    category = db.Column(db.String(100), nullable=False)  # category
 
     def serialize(self):
         """

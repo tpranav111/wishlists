@@ -131,7 +131,7 @@ class TestWishlist(TestCase):
         self.assertEqual(old_item.note, item.note)
         # Change the note
         old_item.note = "Updated"
-        old_item.category = "Food"
+        old_item.category = "Food"  # category
         old_item.quantity = 7
         wishlist.update()
 
