@@ -131,6 +131,7 @@ class TestWishlist(TestCase):
         self.assertEqual(old_item.note, item.note)
         # Change the note
         old_item.note = "Updated"
+        old_item.category = "Food"
         old_item.quantity = 7
         wishlist.update()
 
@@ -138,6 +139,7 @@ class TestWishlist(TestCase):
         wishlist = Wishlist.find(wishlist.id)
         item = wishlist.items[0]
         self.assertEqual(item.note, "Updated")
+        self.assertEqual(item.category, "Food")
         self.assertEqual(item.quantity, 7)
 
     def test_update_wishlist_item_invalid_quantity(self):
@@ -151,6 +153,7 @@ class TestWishlist(TestCase):
         old_item = wishlist.items[0]
         old_item.note = "Updated"
         old_item.quantity = "invalid"
+        old_item.category = "Food"
         with self.assertRaises(DataValidationError):
             wishlist.update()
 
@@ -166,6 +169,7 @@ class TestWishlist(TestCase):
         self.assertEqual(found_item.id, item.id)
         self.assertEqual(found_item.name, item.name)
         self.assertEqual(found_item.quantity, item.quantity)
+        self.assertEqual(found_item.category, item.category)
         self.assertEqual(found_item.note, item.note)
 
     def test_deserialize_item_key_error(self):

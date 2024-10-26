@@ -179,8 +179,8 @@ class TestWishlist(TestCase):
             "updated_time": "2024-01-01 12:00:00",
             "note": "This is a sample note",
             "items": [
-                {"name": "Item 1", "quantity": 2},
-                {"name": "Item 2", "quantity": 5},
+                {"name": "Item 1", "quantity": 2, "category": "default_category"},
+                {"name": "Item 2", "quantity": 5, "category": "default_category"},
             ],
         }
         wishlist = WishlistFactory()

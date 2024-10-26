@@ -189,6 +189,7 @@ class TestWishlistService(TestCase):
         self.assertEqual(data["id"], item.id)
         self.assertEqual(data["wishlist_id"], wishlist.id)
         self.assertEqual(data["quantity"], item.quantity)
+        self.assertEqual(data["category"], item.category)
         self.assertEqual(data["note"], item.note)
 
         # Check that the location header was correct by getting it
