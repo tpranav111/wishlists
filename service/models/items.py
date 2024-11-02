@@ -42,6 +42,7 @@ class Items(db.Model, PersistentBase):
     name = db.Column(db.String(100), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     note = db.Column(db.String(1000), nullable=True)
+    is_favorite = db.Column(db.Boolean, default=False)
 
     def serialize(self):
         """
@@ -53,6 +54,7 @@ class Items(db.Model, PersistentBase):
             "note": self.note,
             "quantity": self.quantity,
             "wishlist_id": self.wishlist_id,
+            "is_favorite": self.is_favorite,
         }
 
     def deserialize(self, data):
@@ -63,6 +65,7 @@ class Items(db.Model, PersistentBase):
             self.name = data["name"]
             self.quantity = data["quantity"]
             self.note = data.get("note", "")
+            self.is_favorite = data.get("is_favorite", False)
 
         except KeyError as error:
             raise DataValidationError(

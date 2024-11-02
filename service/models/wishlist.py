@@ -33,6 +33,7 @@ class Wishlist(db.Model, PersistentBase):
     name = db.Column(db.String(100), nullable=False)  # wishlist name
     updated_time = db.Column(db.DateTime, nullable=False)
     note = db.Column(db.String(1000), nullable=True)
+    is_favorite = db.Column(db.Boolean, default=False)
 
     items = db.relationship("Items", backref="wishlist", passive_deletes=True)
 
@@ -47,6 +48,7 @@ class Wishlist(db.Model, PersistentBase):
             "updated_time": (self.updated_time.strftime("%a, %d %b %Y %H:%M:%S GMT")),
             "note": self.note,
             "items": [],
+            "is_favorite": self.is_favorite,
         }
         for item in self.items:
             wishlist["items"].append(item.serialize())
@@ -64,6 +66,7 @@ class Wishlist(db.Model, PersistentBase):
             self.name = data["name"]
             self.updated_time = data["updated_time"]
             self.note = data["note"]
+            self.is_favorite = data.get("is_favorite", False)
 
             # handle inner list of addresses
             item_list = data.get("items")
