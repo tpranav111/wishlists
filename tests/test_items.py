@@ -90,6 +90,7 @@ class TestWishlist(TestCase):
         new_wishlist = Wishlist.find(wishlist.id)
         self.assertEqual(len(new_wishlist.items), 2)
         self.assertEqual(new_wishlist.items[1].name, item2.name)
+        self.assertEqual(new_wishlist.items[1].is_favorite, item2.is_favorite)
 
     def test_delete_items(self):
         """It should Delete an item from a Wishlist"""
