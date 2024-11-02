@@ -43,6 +43,7 @@ class Items(db.Model, PersistentBase):
     quantity = db.Column(db.Integer, nullable=False)
     note = db.Column(db.String(1000), nullable=True)
     is_favorite = db.Column(db.Boolean, default=False)
+    category = db.Column(db.String(100), nullable=False)
 
     def serialize(self):
         """
