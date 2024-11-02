@@ -78,7 +78,6 @@ class TestWishlist(TestCase):
         self.assertEqual(data.name, wishlist.name)
         self.assertEqual(data.updated_time, wishlist.updated_time)
         self.assertEqual(data.note, wishlist.note)
-        self.assertEqual(data.is_favorite, wishlist.is_favorite)
 
     @patch("service.models.db.session.commit")
     def test_create_a_wishlist_failed(self, exception_mock):

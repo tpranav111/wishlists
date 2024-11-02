@@ -20,7 +20,6 @@ class WishlistFactory(Factory):
 
     id = Sequence(lambda n: n)
     name = Faker("word")
-    is_favorite = Faker("pybool")
     updated_time = LazyAttribute(
         lambda _: test.date_time_between(start_date="-5y", end_date="now")
     )
@@ -40,5 +39,4 @@ class ItemsFactory(Factory):
     quantity = LazyAttribute(lambda _: test.random_int(min=1, max=100))
     category = Faker("word")  # category
     note = Faker("sentence", nb_words=10)
-    is_favorite = Faker("pybool")
     wishlist = SubFactory(WishlistFactory)
