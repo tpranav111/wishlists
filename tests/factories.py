@@ -20,6 +20,7 @@ class WishlistFactory(Factory):
 
     id = Sequence(lambda n: n)
     name = Faker("word")
+    is_favorite = Faker("pybool")
     updated_time = LazyAttribute(
         lambda _: test.date_time_between(start_date="-5y", end_date="now")
     )
