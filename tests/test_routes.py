@@ -450,3 +450,105 @@ class TestWishlistService(TestCase):
         """It should not Accept any requests with unsupported methods"""
         resp = self.client.post("/", json={}, content_type="application/json")
         self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    # TEST MARK ITEM AS FAVORITE
+    # ----------------------------------------------------------
+    def test_mark_item_as_favorite(self):
+        """It should mark an item as favorite"""
+        wishlist = self._create_wishlists(1)[0]
+        item = self._create_items(wishlist.id, 1)[0]
+
+        # Mark the item as favorite
+        response = self.client.put(f"{BASE_URL}/{wishlist.id}/items/{item.id}/favorite")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verify the item is favorite
+        data = response.get_json()
+        self.assertTrue(data["is_favorite"], "Item should be marked as favorite")
+
+        # Find the item and return 404 if not found
+        response = self.client.put(f"{BASE_URL}/{wishlist.id}/items/0/favorite")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        data = response.get_json()
+        logging.debug("Response data = %s", data)
+        self.assertIn(
+            "404 Not Found: Item with id '0' could not be found.", data["message"]
+        )
+
+    # ----------------------------------------------------------
+    # TEST CANCEL ITEM AS FAVORITE
+    # ----------------------------------------------------------
+    def test_cancel_item_as_favorite(self):
+        """It should cancel an item as favorite"""
+        wishlist = self._create_wishlists(1)[0]
+        item = self._create_items(wishlist.id, 1)[0]
+
+        self.client.put(f"{BASE_URL}/{wishlist.id}/items/{item.id}/favorite")
+
+        # Cancel the item as favorite
+        response = self.client.delete(
+            f"{BASE_URL}/{wishlist.id}/items/{item.id}/favorite"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verify the item is not favorite
+        data = response.get_json()
+        self.assertFalse(data["is_favorite"], "Item should be canceled as favorite")
+
+        # Find the item and return 404 if not found
+        response = self.client.put(f"{BASE_URL}/{wishlist.id}/items/0/favorite")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        data = response.get_json()
+        logging.debug("Response data = %s", data)
+        self.assertIn(
+            "404 Not Found: Item with id '0' could not be found.", data["message"]
+        )
+
+    # TEST MARK WISHLIST AS FAVORITE
+    # ----------------------------------------------------------
+    def test_mark_wishlist_as_favorite(self):
+        """It should mark an wishlist as favorite"""
+        wishlist = self._create_wishlists(1)[0]
+
+        # Mark the wishlist as favorite
+        response = self.client.put(f"{BASE_URL}/{wishlist.id}/favorite")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verify the wishlist is favorite
+        data = response.get_json()
+        self.assertTrue(data["is_favorite"], "Wishlist should be marked as favorite")
+
+        # Find the wishlist and return 404 if not found
+        response = self.client.put(f"{BASE_URL}/0/favorite")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        data = response.get_json()
+        logging.debug("Response data = %s", data)
+        self.assertIn(
+            "404 Not Found: Wishlist with id '0' could not be found.", data["message"]
+        )
+
+    # ----------------------------------------------------------
+    # TEST CANCEL WISHLIST AS FAVORITE
+    # ----------------------------------------------------------
+    def test_cancel_wishlist_as_favorite(self):
+        """It should cancel an wishlist as favorite"""
+        wishlist = self._create_wishlists(1)[0]
+
+        self.client.put(f"{BASE_URL}/{wishlist.id}/favorite")
+
+        # Cancel the wishlist as favorite
+        response = self.client.delete(f"{BASE_URL}/{wishlist.id}/favorite")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verify the wishlist is not favorite
+        data = response.get_json()
+        self.assertFalse(data["is_favorite"], "Item should be canceled as favorite")
+
+        # Find the wishlist and return 404 if not found
+        response = self.client.put(f"{BASE_URL}/0/favorite")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        data = response.get_json()
+        logging.debug("Response data = %s", data)
+        self.assertIn(
+            "404 Not Found: Wishlist with id '0' could not be found.", data["message"]
+        )
