@@ -62,9 +62,20 @@ def index():
 def list_wishlists():
     """Return list of all Wishlists"""
     wls = []
-    wls = Wishlist.all()
+
+    is_favorite = request.args.get("is_favorite")
+    # Parse any arguments from the query string
+    if is_favorite:
+        app.logger.info("Find by is_favorite: %s", is_favorite)
+        # create bool from string
+        is_favorite_value = is_favorite.lower() in ["true", "yes", "1"]
+        wls = Wishlist.find_by_favorite(is_favorite_value)
+    else:
+        app.logger.info("Find all")
+        wls = Wishlist.all()
     results = [wl.serialize() for wl in wls]
     app.logger.info("Returning %d WLs", len(results))
+
     return jsonify(results), status.HTTP_200_OK
 
 
@@ -303,6 +314,8 @@ def get_all_items(wishlist_id):
     """
     Get all Items in WL
     """
+    app.logger.info("Request to create an Item for Wishlist with id: %s", wishlist_id)
+    # See if the wishlist exists and abort if it doesn't
     wishlist = Wishlist.find(wishlist_id)
     if not wishlist:
         abort(
@@ -310,7 +323,22 @@ def get_all_items(wishlist_id):
             f"Wishlist with id '{wishlist_id}' could not be found.",
         )
 
-    return jsonify(wishlist.serialize()["items"]), status.HTTP_200_OK
+    items = []
+
+    is_favorite = request.args.get("is_favorite")
+    # Parse any arguments from the query string
+    if is_favorite:
+        app.logger.info("Find by is_favorite: %s", is_favorite)
+        # create bool from string
+        is_favorite_value = is_favorite.lower() in ["true", "yes", "1"]
+        items = Items.find_by_favorite(wishlist_id, is_favorite_value)
+    else:
+        app.logger.info("Find all")
+        items = Items.all()
+    results = [item.serialize() for item in items]
+    app.logger.info("Returning %d Items", len(results))
+
+    return jsonify(results), status.HTTP_200_OK
 
 
 ######################################################################

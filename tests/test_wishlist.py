@@ -198,3 +198,17 @@ class TestWishlist(TestCase):
         self.assertEqual(wishlist.items[0].quantity, 2)
         self.assertEqual(wishlist.items[1].name, "Item 2")
         self.assertEqual(wishlist.items[1].quantity, 5)
+
+    def test_find_by_favorite(self):
+        """It should Find Wishlists by Favorite"""
+        wishlists = WishlistFactory.create_batch(10)
+        for wishlist in wishlists:
+            wishlist.create()
+        is_favorite = wishlists[0].is_favorite
+        count = len(
+            [wishlist for wishlist in wishlists if wishlist.is_favorite == is_favorite]
+        )
+        found = Wishlist.find_by_favorite(is_favorite)
+        self.assertEqual(found.count(), count)
+        for wishlist in found:
+            self.assertEqual(wishlist.is_favorite, is_favorite)

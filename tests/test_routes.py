@@ -552,3 +552,74 @@ class TestWishlistService(TestCase):
         self.assertIn(
             "404 Not Found: Wishlist with id '0' could not be found.", data["message"]
         )
+
+    def test_query_wishlist_by_favorite(self):
+        """It should Query Wishlist by favorite"""
+        wishlists = self._create_wishlists(10)
+        favorite_wishlist = [
+            wishlist for wishlist in wishlists if wishlist.is_favorite is True
+        ]
+        unfavorite_wishlist = [
+            wishlist for wishlist in wishlists if wishlist.is_favorite is False
+        ]
+        is_favorite_count = len(favorite_wishlist)
+        unis_favorite_count = len(unfavorite_wishlist)
+        logging.debug(
+            "Available Wishlist [%d] %s", is_favorite_count, favorite_wishlist
+        )
+        logging.debug(
+            "Unis_favorite Wishlist [%d] %s", unis_favorite_count, unfavorite_wishlist
+        )
+
+        # test for is_favorite
+        response = self.client.get(BASE_URL, query_string="is_favorite=true")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), is_favorite_count)
+        # check the data just to be sure
+        for wishlist in data:
+            self.assertEqual(wishlist["is_favorite"], True)
+
+        # test for unis_favorite
+        response = self.client.get(BASE_URL, query_string="is_favorite=false")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), unis_favorite_count)
+        # check the data just to be sure
+        for wishlist in data:
+            self.assertEqual(wishlist["is_favorite"], False)
+
+    def test_query_item_by_favorite(self):
+        """It should Query Items by favorite"""
+        wishlist = self._create_wishlists(1)[0]
+        items = self._create_items(wishlist.id, 10)
+        favorite_item = [item for item in items if item.is_favorite is True]
+        unfavorite_item = [item for item in items if item.is_favorite is False]
+        is_favorite_count = len(favorite_item)
+        unis_favorite_count = len(unfavorite_item)
+        logging.debug("Available Items [%d] %s", is_favorite_count, favorite_item)
+        logging.debug(
+            "Unis_favorite Items [%d] %s", unis_favorite_count, unfavorite_item
+        )
+
+        # test for is_favorite
+        response = self.client.get(
+            f"{BASE_URL}/{wishlist.id}/items", query_string="is_favorite=true"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), is_favorite_count)
+        # check the data just to be sure
+        for item in data:
+            self.assertEqual(item["is_favorite"], True)
+
+        # test for unis_favorite
+        response = self.client.get(
+            f"{BASE_URL}/{wishlist.id}/items", query_string="is_favorite=false"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), unis_favorite_count)
+        # check the data just to be sure
+        for item in data:
+            self.assertEqual(item["is_favorite"], False)
