@@ -5,7 +5,7 @@ Test Factory to make fake objects for testing
 from faker import Faker as FK
 from factory import Factory, SubFactory, Sequence, Faker, LazyAttribute
 from service.models import Wishlist, Items
-
+import random
 
 test = FK()
 
@@ -40,3 +40,4 @@ class ItemsFactory(Factory):
     category = Faker("word")  # category
     note = Faker("sentence", nb_words=10)
     wishlist = SubFactory(WishlistFactory)
+    price = LazyAttribute(lambda _: round(random.uniform(10.0, 100.0), 2))

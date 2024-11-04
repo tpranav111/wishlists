@@ -180,8 +180,18 @@ class TestWishlist(TestCase):
             "updated_time": "2024-01-01 12:00:00",
             "note": "This is a sample note",
             "items": [
-                {"name": "Item 1", "quantity": 2, "category": "default_category"},
-                {"name": "Item 2", "quantity": 5, "category": "default_category"},
+                {
+                    "name": "Item 1",
+                    "quantity": 2,
+                    "category": "default_category",
+                    "price": 19.99,
+                },
+                {
+                    "name": "Item 2",
+                    "quantity": 5,
+                    "category": "default_category",
+                    "price": 39.99,
+                },
             ],
         }
         wishlist = WishlistFactory()
@@ -195,5 +205,10 @@ class TestWishlist(TestCase):
         # Check if each item is correctly deserialized
         self.assertEqual(wishlist.items[0].name, "Item 1")
         self.assertEqual(wishlist.items[0].quantity, 2)
+        self.assertEqual(wishlist.items[0].category, "default_category")
+        self.assertEqual(wishlist.items[0].price, 19.99)
+
         self.assertEqual(wishlist.items[1].name, "Item 2")
         self.assertEqual(wishlist.items[1].quantity, 5)
+        self.assertEqual(wishlist.items[1].category, "default_category")
+        self.assertEqual(wishlist.items[1].price, 39.99)

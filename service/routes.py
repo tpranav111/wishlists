@@ -303,14 +303,27 @@ def get_all_items(wishlist_id):
     """
     Get all Items in WL
     """
+    category = request.args.get("category")
+    price = request.args.get("price", type=float)
     wishlist = Wishlist.find(wishlist_id)
     if not wishlist:
         abort(
             status.HTTP_404_NOT_FOUND,
             f"Wishlist with id '{wishlist_id}' could not be found.",
         )
+    if category:
+        app.logger.info("Filtering by category: %s", category)
+        items = Items.find_by_category(wishlist_id=wishlist_id, category=category)
+    elif price is not None:
+        app.logger.info("Filtering by price: %s", price)
+        items = Items.find_by_price(wishlist_id=wishlist_id, price=price)
+    else:
+        app.logger.info("Retrieving all items in wishlist")
+        items = Items.all()
 
-    return jsonify(wishlist.serialize()["items"]), status.HTTP_200_OK
+    results = [item.serialize() for item in items]
+    app.logger.info("[%s] Items returned", len(results))
+    return jsonify(results), status.HTTP_200_OK
 
 
 # search item using query str

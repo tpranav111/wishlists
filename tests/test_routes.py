@@ -190,6 +190,7 @@ class TestWishlistService(TestCase):
         self.assertEqual(data["wishlist_id"], wishlist.id)
         self.assertEqual(data["quantity"], item.quantity)
         self.assertEqual(data["category"], item.category)  # category
+        self.assertEqual(data["price"], item.price)
         self.assertEqual(data["note"], item.note)
 
         # Check that the location header was correct by getting it
@@ -471,6 +472,68 @@ class TestWishlistService(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(data["name"], item.name)
+
+    def test_query_items_by_category(self):
+        """It should Query Items by Category within a Wishlist"""
+        wishlist = self._create_wishlists(1)[0]
+        resp = self.client.get(
+            f"{BASE_URL}/{wishlist.id}", content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+        data = resp.get_json()
+        self.assertEqual(data["name"], wishlist.name)
+        wishlist.id = data["id"]
+
+        item = ItemsFactory(category="food")
+        resp = self.client.post(
+            f"{BASE_URL}/{wishlist.id}/items",
+            json=item.serialize(),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        test_category = "food"
+        response = self.client.get(
+            f"{BASE_URL}/{wishlist.id}/items?category={test_category}",
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertGreater(len(data), 0)
+        for item in data:
+            self.assertEqual(item["category"], test_category)
+
+    def test_query_items_by_price(self):
+        """It should Query Items by Price within a Wishlist"""
+        wishlist = self._create_wishlists(1)[0]
+        resp = self.client.get(
+            f"{BASE_URL}/{wishlist.id}", content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+        data = resp.get_json()
+        self.assertEqual(data["name"], wishlist.name)
+        wishlist.id = data["id"]
+
+        item = ItemsFactory(price=20.5)
+        resp = self.client.post(
+            f"{BASE_URL}/{wishlist.id}/items",
+            json=item.serialize(),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        test_price = 20.5
+        response = self.client.get(
+            f"{BASE_URL}/{wishlist.id}/items?price={test_price}",
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertGreater(len(data), 0)
+        for item in data:
+            self.assertEqual(item["price"], test_price)
 
     def test_data_validation_error(self):
         """It should return a 400 error for invalid data"""
