@@ -440,6 +440,38 @@ class TestWishlistService(TestCase):
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0]["name"], item.name)
 
+    # search an item in given WL
+    def test_search_item_in_wishlist(self):
+        """It should search items in a wishlist***"""
+
+        wishlist = self._create_wishlists(1)[0]
+        resp = self.client.get(
+            f"{BASE_URL}/{wishlist.id}", content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+        data = resp.get_json()
+        self.assertEqual(data["name"], wishlist.name)
+        wishlist.id = data["id"]
+
+        item = ItemsFactory()
+        resp = self.client.post(
+            f"{BASE_URL}/{wishlist.id}/items",
+            json=item.serialize(),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        item_name = item.name
+
+        resp = self.client.get(
+            f"{BASE_URL}/{wishlist.id}/items/name?search="
+            + item_name,  # Correct endpoint for fetching items
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(data["name"], item.name)
+
     def test_data_validation_error(self):
         """It should return a 400 error for invalid data"""
         invalid_data = {"invalid_field": "invalid_value"}

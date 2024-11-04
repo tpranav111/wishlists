@@ -463,3 +463,29 @@ def cancel_wishlist_favorite(wishlist_id):
     app.logger.info("Wishlist [%s] canceled as favorite", wishlist_id)
 
     return jsonify(wishlist.serialize()), status.HTTP_200_OK
+
+
+
+# search item using query str
+@app.route("/wishlists/<int:wishlist_id>/items/name", methods=["GET"])
+def search_items(wishlist_id):
+    """
+    Search Item by name in given WL
+    """
+    wishlist = Wishlist.find(wishlist_id)
+    if not wishlist:
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Wishlist with id '{wishlist_id}' could not be found.",
+        )
+
+    item_name = request.args.get("search", default="")
+
+    for itm in wishlist.serialize()["items"]:
+        if itm["name"] == item_name:
+            return itm, status.HTTP_200_OK
+
+    abort(
+        status.HTTP_404_NOT_FOUND,
+        f"Item '{item_name}' could not be found in id '{wishlist_id}'  :(",
+    )
