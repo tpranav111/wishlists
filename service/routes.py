@@ -62,9 +62,20 @@ def index():
 def list_wishlists():
     """Return list of all Wishlists"""
     wls = []
-    wls = Wishlist.all()
+
+    is_favorite = request.args.get("is_favorite")
+    # Parse any arguments from the query string
+    if is_favorite:
+        app.logger.info("Find by is_favorite: %s", is_favorite)
+        # create bool from string
+        is_favorite_value = is_favorite.lower() in ["true", "yes", "1"]
+        wls = Wishlist.find_by_favorite(is_favorite_value)
+    else:
+        app.logger.info("Find all")
+        wls = Wishlist.all()
     results = [wl.serialize() for wl in wls]
     app.logger.info("Returning %d WLs", len(results))
+
     return jsonify(results), status.HTTP_200_OK
 
 
@@ -303,6 +314,8 @@ def get_all_items(wishlist_id):
     """
     Get all Items in WL
     """
+    app.logger.info("Request to create an Item for Wishlist with id: %s", wishlist_id)
+    # See if the wishlist exists and abort if it doesn't
     wishlist = Wishlist.find(wishlist_id)
     if not wishlist:
         abort(
@@ -310,7 +323,147 @@ def get_all_items(wishlist_id):
             f"Wishlist with id '{wishlist_id}' could not be found.",
         )
 
-    return jsonify(wishlist.serialize()["items"]), status.HTTP_200_OK
+    items = []
+
+    is_favorite = request.args.get("is_favorite")
+    # Parse any arguments from the query string
+    if is_favorite:
+        app.logger.info("Find by is_favorite: %s", is_favorite)
+        # create bool from string
+        is_favorite_value = is_favorite.lower() in ["true", "yes", "1"]
+        items = Items.find_by_favorite(wishlist_id, is_favorite_value)
+    else:
+        app.logger.info("Find all")
+        items = Items.all()
+    results = [item.serialize() for item in items]
+    app.logger.info("Returning %d Items", len(results))
+
+    return jsonify(results), status.HTTP_200_OK
+
+
+######################################################################
+# MARK AN ITEM AS FAVORITE
+######################################################################
+@app.route("/wishlists/<int:wishlist_id>/items/<int:item_id>/favorite", methods=["PUT"])
+def mark_item_favorite(wishlist_id, item_id):
+    """
+    Mark an item as favorite in a wishlist
+    """
+    app.logger.info(
+        "Request to mark item [%s] as favorite in Wishlist with id: %s",
+        item_id,
+        wishlist_id,
+    )
+
+    # Find the item and return 404 if not found
+    item = Items.find(item_id)
+    if not item or item.wishlist_id != wishlist_id:
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Item with id '{item_id}' could not be found.",
+        )
+
+    # Mark the item as favorite
+    item.is_favorite = True
+    item.update()
+    app.logger.info(
+        "Item [%s] marked as favorite in Wishlist [%s]", item_id, wishlist_id
+    )
+
+    return jsonify(item.serialize()), status.HTTP_200_OK
+
+
+######################################################################
+# CANCEL AN ITEM AS FAVORITE
+######################################################################
+@app.route(
+    "/wishlists/<int:wishlist_id>/items/<int:item_id>/favorite", methods=["DELETE"]
+)
+def cancel_item_favorite(wishlist_id, item_id):
+    """
+    Cancel an item as favorite in a wishlist
+    """
+    app.logger.info(
+        "Request to cancel item [%s] as favorite in Wishlist with id: %s",
+        item_id,
+        wishlist_id,
+    )
+
+    # Find the item and return 404 if not found
+    item = Items.find(item_id)
+    if not item or item.wishlist_id != wishlist_id:
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Item with id '{item_id}' could not be found.",
+        )
+
+    # Cancel the item as favorite
+    item.is_favorite = False
+    item.update()
+    app.logger.info(
+        "Item [%s] canceled as favorite in Wishlist [%s]", item_id, wishlist_id
+    )
+
+    return jsonify(item.serialize()), status.HTTP_200_OK
+
+
+######################################################################
+# MARK AN WISHLIST AS FAVORITE
+######################################################################
+@app.route("/wishlists/<int:wishlist_id>/favorite", methods=["PUT"])
+def mark_wishlist_favorite(wishlist_id):
+    """
+    Mark an item as favorite in a wishlist
+    """
+    app.logger.info(
+        "Request to mark wishlist [%s] as favorite",
+        wishlist_id,
+    )
+
+    # Find the item and return 404 if not found
+    wishlist = Wishlist.find(wishlist_id)
+    if not wishlist:
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Wishlist with id '{wishlist_id}' could not be found.",
+        )
+
+    # Mark the item as favorite
+    wishlist.is_favorite = True
+    wishlist.update()
+    app.logger.info("Wishlist [%s] marked as favorite", wishlist_id)
+
+    return jsonify(wishlist.serialize()), status.HTTP_200_OK
+
+
+######################################################################
+# CANCEL AN ITEM AS FAVORITE
+######################################################################
+@app.route("/wishlists/<int:wishlist_id>/favorite", methods=["DELETE"])
+def cancel_wishlist_favorite(wishlist_id):
+    """
+    Cancel an item as favorite in a wishlist
+    """
+    app.logger.info(
+        "Request to cancel wishlist [%s] as favorite",
+        wishlist_id,
+    )
+
+    # Find the item and return 404 if not found
+    wishlist = Wishlist.find(wishlist_id)
+    if not wishlist:
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Wishlist with id '{wishlist_id}' could not be found.",
+        )
+
+    # Cancel the wishlist as favorite
+    wishlist.is_favorite = False
+    wishlist.update()
+    app.logger.info("Wishlist [%s] canceled as favorite", wishlist_id)
+
+    return jsonify(wishlist.serialize()), status.HTTP_200_OK
+
 
 
 # search item using query str

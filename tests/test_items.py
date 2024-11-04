@@ -90,6 +90,7 @@ class TestWishlist(TestCase):
         new_wishlist = Wishlist.find(wishlist.id)
         self.assertEqual(len(new_wishlist.items), 2)
         self.assertEqual(new_wishlist.items[1].name, item2.name)
+        self.assertEqual(new_wishlist.items[1].is_favorite, item2.is_favorite)
 
     def test_delete_items(self):
         """It should Delete an item from a Wishlist"""
@@ -181,3 +182,37 @@ class TestWishlist(TestCase):
         """It should not Deserialize an item with a TypeError"""
         item = Items()
         self.assertRaises(DataValidationError, item.deserialize, [])
+
+    def test_find_by_favorite(self):
+        """It should Find Items by is_favorite"""
+
+        # Ensure no wishlists exist initially
+        wishlists = Wishlist.all()
+        self.assertEqual(wishlists, [])
+
+        # Create a new wishlist and add it to the database
+        wishlist = WishlistFactory()
+        wishlist.create()
+
+        # Assert that the wishlist has been created and has an ID
+        self.assertIsNotNone(wishlist.id)
+
+        # Create 10 items associated with the created wishlist
+        items = ItemsFactory.create_batch(10, wishlist=wishlist)
+        for item in items:
+            db.session.add(item)
+
+        db.session.add(wishlist)
+        db.session.commit()
+        # Check that we have 10 items in the database for the wishlist
+        self.assertEqual(len(Items.all()), 10)
+
+        # Find and count items with a specific `is_favorite` status
+        is_favorite = items[0].is_favorite
+        count = len([item for item in items if item.is_favorite == is_favorite])
+        found = Items.find_by_favorite(wishlist.id, is_favorite)
+
+        # Verify that the number of found items matches the expected count
+        self.assertEqual(found.count(), count)
+        for item in found:
+            self.assertEqual(item.is_favorite, is_favorite)
