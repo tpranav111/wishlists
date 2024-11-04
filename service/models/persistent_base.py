@@ -37,9 +37,6 @@ class DataValidationError(Exception):
 class PersistentBase:
     """Base class added persistent methods"""
 
-    def __init__(self):
-        self.id = None  # pylint: disable=invalid-name
-
     @abstractmethod
     def serialize(self) -> dict:
         """Convert an object into a dictionary"""
@@ -50,11 +47,12 @@ class PersistentBase:
 
     def create(self) -> None:
         """
-        Creates a Account to the database
+        Creates a Wishlist to the database
         """
         logger.info("Creating %s", self)
         # id must be none to generate next primary key
-        self.id = None
+        # remove this in order to create self-assigned wishlist and items id
+        # self.id = None
         try:
             db.session.add(self)
             db.session.commit()
@@ -65,9 +63,10 @@ class PersistentBase:
 
     def update(self) -> None:
         """
-        Updates a Account to the database
+        Updates a Wishlist to the database
         """
         logger.info("Updating %s", self)
+        # print(f"ID CHECK : {self.id}")
         if not self.id:
             raise DataValidationError("Update called with empty ID field")
         try:
@@ -78,7 +77,7 @@ class PersistentBase:
             raise DataValidationError(e) from e
 
     def delete(self) -> None:
-        """Removes a Account from the data store"""
+        """Removes a Wishlist from the data store"""
         logger.info("Deleting %s", self)
         try:
             db.session.delete(self)
