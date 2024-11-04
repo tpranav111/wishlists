@@ -82,6 +82,7 @@ class TestWishlist(TestCase):
 
         new_wishlist = Wishlist.find(wishlist.id)
         self.assertEqual(new_wishlist.items[0].name, item.name)
+        self.assertEqual(new_wishlist.items[0].is_favorite, item.is_favorite)
 
         item2 = ItemsFactory(wishlist=wishlist)
         wishlist.items.append(item2)
