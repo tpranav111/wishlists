@@ -133,6 +133,11 @@ def update_wishlists(wishlist_id):
     data = request.get_json()
     app.logger.info("Processing: %s", data)
     wishlist.deserialize(data)
+
+    # Ensure the ID is set before updating
+    if not wishlist.id:
+        abort(status.HTTP_400_BAD_REQUEST, "Cannot update wishlist with empty ID.")
+
     # Save the updates to the database
     wishlist.update()
     app.logger.info("Wishlist with ID: %d updated.", wishlist.id)
@@ -182,6 +187,9 @@ def delete_wishlists(wishlist_id):
 ######################################################################
 
 
+######################################################################
+# CREATE AN ITEM
+######################################################################
 @app.route("/wishlists/<int:wishlist_id>/items", methods=["POST"])
 def create_items(wishlist_id):
     """
@@ -218,6 +226,9 @@ def create_items(wishlist_id):
     return jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
 
 
+######################################################################
+# GET AN ITEM
+######################################################################
 @app.route("/wishlists/<int:wishlist_id>/items/<int:item_id>", methods=["GET"])
 def get_items(wishlist_id, item_id):
     """
@@ -240,6 +251,9 @@ def get_items(wishlist_id, item_id):
     return jsonify(item.serialize()), status.HTTP_200_OK
 
 
+######################################################################
+# DELETE AN ITEM
+######################################################################
 @app.route("/wishlists/<int:wishlist_id>/items/<int:item_id>", methods=["DELETE"])
 def delete_items(wishlist_id, item_id):
     """
@@ -255,7 +269,9 @@ def delete_items(wishlist_id, item_id):
     return "", status.HTTP_204_NO_CONTENT
 
 
-# Update an item in wishlist
+######################################################################
+# UPDATE AN ITEM
+######################################################################
 @app.route("/wishlists/<int:wishlist_id>/items/<int:item_id>", methods=["PUT"])
 def update_item(wishlist_id, item_id):
     """
@@ -277,6 +293,11 @@ def update_item(wishlist_id, item_id):
 
     data = request.get_json()
     item.deserialize(data)
+
+    # Ensure the ID is set before updating
+    if not item.id:
+        abort(status.HTTP_400_BAD_REQUEST, "Cannot update item with empty ID.")
+
     item.update()
     return jsonify(item.serialize()), 200
 
@@ -463,7 +484,6 @@ def cancel_wishlist_favorite(wishlist_id):
     app.logger.info("Wishlist [%s] canceled as favorite", wishlist_id)
 
     return jsonify(wishlist.serialize()), status.HTTP_200_OK
-
 
 
 # search item using query str
