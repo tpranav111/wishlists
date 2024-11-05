@@ -29,10 +29,11 @@ class Wishlist(db.Model, PersistentBase):
 
     __tablename__ = "wishlist"
 
-    id = db.Column(db.Integer, primary_key=True)  # wishlist id
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)  # wishlist id
     name = db.Column(db.String(100), nullable=False)  # wishlist name
     updated_time = db.Column(db.DateTime, nullable=False)
     note = db.Column(db.String(1000), nullable=True)
+    is_favorite = db.Column(db.Boolean, default=False)
 
     items = db.relationship("Items", backref="wishlist", passive_deletes=True)
 
@@ -47,6 +48,7 @@ class Wishlist(db.Model, PersistentBase):
             "updated_time": (self.updated_time.strftime("%a, %d %b %Y %H:%M:%S GMT")),
             "note": self.note,
             "items": [],
+            "is_favorite": self.is_favorite,
         }
         for item in self.items:
             wishlist["items"].append(item.serialize())
@@ -61,9 +63,11 @@ class Wishlist(db.Model, PersistentBase):
             data (dict): A dictionary containing the resource data
         """
         try:
+            self.id = data["id"]
             self.name = data["name"]
             self.updated_time = data["updated_time"]
             self.note = data["note"]
+            self.is_favorite = data.get("is_favorite", False)
 
             # handle inner list of addresses
             item_list = data.get("items")
@@ -107,3 +111,19 @@ class Wishlist(db.Model, PersistentBase):
         """
         logger.info("Processing name query for %s ...", name)
         return cls.query.filter(cls.name == name).all()
+
+    @classmethod
+    def find_by_favorite(cls, is_favorite: bool = True) -> list:
+        """Returns all Wishlists by their is_favorite
+
+        :param is_favorite: True for wishlists that are favorite
+        :type favorite: str
+
+        :return: a collection of Items that are favorite
+        :rtype: list
+
+        """
+        if not isinstance(is_favorite, bool):
+            raise TypeError("Invalid availability, must be of type boolean")
+        logger.info("Processing favorite query for %s ...", is_favorite)
+        return cls.query.filter(cls.is_favorite == is_favorite)

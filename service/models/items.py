@@ -44,6 +44,7 @@ class Items(db.Model, PersistentBase):
     note = db.Column(db.String(1000), nullable=True)
     category = db.Column(db.String(100), nullable=False)  # category
     price = db.Column(db.Float, nullable=False)
+    is_favorite = db.Column(db.Boolean, default=False)
 
     def serialize(self):
         """
@@ -57,6 +58,7 @@ class Items(db.Model, PersistentBase):
             "quantity": self.quantity,
             "price": self.price,
             "wishlist_id": self.wishlist_id,
+            "is_favorite": self.is_favorite,
         }
 
     def deserialize(self, data):
@@ -64,11 +66,13 @@ class Items(db.Model, PersistentBase):
         Deserializes an Item from a dictionary
         """
         try:
+            self.id = data["id"]
             self.name = data["name"]
             self.quantity = data["quantity"]
             self.category = data["category"]
             self.price = data["price"]
             self.note = data.get("note", "")
+            self.is_favorite = data.get("is_favorite", False)
 
         except KeyError as error:
             raise DataValidationError(
@@ -111,3 +115,21 @@ class Items(db.Model, PersistentBase):
         return cls.query.filter(
             cls.wishlist_id == wishlist_id, cls.category == category
         ).all()
+
+    @classmethod
+    def find_by_favorite(cls, wishlist_id, is_favorite: bool = True) -> list:
+        """Returns all Items by their is_favorite
+
+        :param is_favorite: True for items that are favorite
+        :type favorite: str
+
+        :return: a collection of Items that are favorite
+        :rtype: list
+
+        """
+        if not isinstance(is_favorite, bool):
+            raise TypeError("Invalid availability, must be of type boolean")
+        logger.info("Processing favorite query for %s ...", is_favorite)
+        return cls.query.filter(
+            cls.wishlist_id == wishlist_id, cls.is_favorite == is_favorite
+        )

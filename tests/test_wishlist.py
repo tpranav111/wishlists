@@ -78,6 +78,7 @@ class TestWishlist(TestCase):
         self.assertEqual(data.name, wishlist.name)
         self.assertEqual(data.updated_time, wishlist.updated_time)
         self.assertEqual(data.note, wishlist.note)
+        self.assertEqual(data.is_favorite, wishlist.is_favorite)
 
     @patch("service.models.db.session.commit")
     def test_create_a_wishlist_failed(self, exception_mock):
@@ -176,20 +177,23 @@ class TestWishlist(TestCase):
         """It should correctly deserialize a Wishlist with valid items"""
         # add category
         data = {
+            "id": 100,
             "name": "My Wishlist",
             "updated_time": "2024-01-01 12:00:00",
             "note": "This is a sample note",
             "items": [
                 {
+                    "id": 1,
                     "name": "Item 1",
                     "quantity": 2,
-                    "category": "default_category",
+                    "category": "electronics",
                     "price": 19.99,
                 },
                 {
+                    "id": 2,
                     "name": "Item 2",
                     "quantity": 5,
-                    "category": "default_category",
+                    "category": "books",
                     "price": 39.99,
                 },
             ],
@@ -201,14 +205,26 @@ class TestWishlist(TestCase):
         self.assertEqual(wishlist.name, data["name"])
         self.assertEqual(wishlist.note, data["note"])
         self.assertEqual(len(wishlist.items), 2)  # Two items should be deserialized
-
-        # Check if each item is correctly deserialized
         self.assertEqual(wishlist.items[0].name, "Item 1")
         self.assertEqual(wishlist.items[0].quantity, 2)
-        self.assertEqual(wishlist.items[0].category, "default_category")
+        self.assertEqual(wishlist.items[0].category, "electronics")
         self.assertEqual(wishlist.items[0].price, 19.99)
 
         self.assertEqual(wishlist.items[1].name, "Item 2")
         self.assertEqual(wishlist.items[1].quantity, 5)
-        self.assertEqual(wishlist.items[1].category, "default_category")
+        self.assertEqual(wishlist.items[1].category, "books")
         self.assertEqual(wishlist.items[1].price, 39.99)
+
+    def test_find_by_favorite(self):
+        """It should Find Wishlists by Favorite"""
+        wishlists = WishlistFactory.create_batch(10)
+        for wishlist in wishlists:
+            wishlist.create()
+        is_favorite = wishlists[0].is_favorite
+        count = len(
+            [wishlist for wishlist in wishlists if wishlist.is_favorite == is_favorite]
+        )
+        found = Wishlist.find_by_favorite(is_favorite)
+        self.assertEqual(found.count(), count)
+        for wishlist in found:
+            self.assertEqual(wishlist.is_favorite, is_favorite)
