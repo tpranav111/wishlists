@@ -174,6 +174,34 @@ class TestWishlist(TestCase):
         self.assertEqual(found_item.category, item.category)
         self.assertEqual(found_item.note, item.note)
 
+    def test_find_by_price(self):
+        """It should find Items by Price"""
+        wishlist = WishlistFactory()
+        item1 = ItemsFactory(price=20.5, wishlist=wishlist)
+        item2 = ItemsFactory(price=50.0, wishlist=wishlist)
+        wishlist.items.append(item1)
+        wishlist.items.append(item2)
+        wishlist.create()
+
+        items = Items.find_by_price(wishlist_id=wishlist.id, price=20.5)
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0].price, 20.5)
+        self.assertEqual(items[0].name, item1.name)
+
+    def test_find_by_category(self):
+        """It should find Items by Category"""
+        wishlist = WishlistFactory()
+        item1 = ItemsFactory(category="food", wishlist=wishlist)
+        item2 = ItemsFactory(category="electronics", wishlist=wishlist)
+        wishlist.items.append(item1)
+        wishlist.items.append(item2)
+        wishlist.create()
+
+        items = Items.find_by_category(wishlist_id=wishlist.id, category="food")
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0].category, "food")
+        self.assertEqual(items[0].name, item1.name)
+
     def test_deserialize_item_key_error(self):
         """It should not Deserialize an item with a KeyError"""
         item = Items()

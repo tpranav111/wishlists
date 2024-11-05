@@ -183,16 +183,18 @@ class TestWishlist(TestCase):
             "note": "This is a sample note",
             "items": [
                 {
-                    "id": 5,
+                    "id": 1,
                     "name": "Item 1",
                     "quantity": 2,
-                    "category": "default_category",
+                    "category": "electronics",
+                    "price": 19.99,
                 },
                 {
-                    "id": 6,
+                    "id": 2,
                     "name": "Item 2",
                     "quantity": 5,
-                    "category": "default_category",
+                    "category": "books",
+                    "price": 39.99,
                 },
             ],
         }
@@ -203,12 +205,15 @@ class TestWishlist(TestCase):
         self.assertEqual(wishlist.name, data["name"])
         self.assertEqual(wishlist.note, data["note"])
         self.assertEqual(len(wishlist.items), 2)  # Two items should be deserialized
-
-        # Check if each item is correctly deserialized
         self.assertEqual(wishlist.items[0].name, "Item 1")
         self.assertEqual(wishlist.items[0].quantity, 2)
+        self.assertEqual(wishlist.items[0].category, "electronics")
+        self.assertEqual(wishlist.items[0].price, 19.99)
+
         self.assertEqual(wishlist.items[1].name, "Item 2")
         self.assertEqual(wishlist.items[1].quantity, 5)
+        self.assertEqual(wishlist.items[1].category, "books")
+        self.assertEqual(wishlist.items[1].price, 39.99)
 
     def test_find_by_favorite(self):
         """It should Find Wishlists by Favorite"""

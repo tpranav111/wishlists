@@ -29,7 +29,7 @@ class Wishlist(db.Model, PersistentBase):
 
     __tablename__ = "wishlist"
 
-    id = db.Column(db.Integer, primary_key=True)  # wishlist id
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)  # wishlist id
     name = db.Column(db.String(100), nullable=False)  # wishlist name
     updated_time = db.Column(db.DateTime, nullable=False)
     note = db.Column(db.String(1000), nullable=True)
@@ -110,7 +110,7 @@ class Wishlist(db.Model, PersistentBase):
             name (string): the name of the Wishlists you want to match
         """
         logger.info("Processing name query for %s ...", name)
-        return cls.query.filter(cls.name == name)
+        return cls.query.filter(cls.name == name).all()
 
     @classmethod
     def find_by_favorite(cls, is_favorite: bool = True) -> list:

@@ -43,6 +43,7 @@ class Items(db.Model, PersistentBase):
     quantity = db.Column(db.Integer, nullable=False)
     note = db.Column(db.String(1000), nullable=True)
     category = db.Column(db.String(100), nullable=False)  # category
+    price = db.Column(db.Float, nullable=False)
     is_favorite = db.Column(db.Boolean, default=False)
 
     def serialize(self):
@@ -55,6 +56,7 @@ class Items(db.Model, PersistentBase):
             "note": self.note,
             "category": self.category,
             "quantity": self.quantity,
+            "price": self.price,
             "wishlist_id": self.wishlist_id,
             "is_favorite": self.is_favorite,
         }
@@ -68,6 +70,7 @@ class Items(db.Model, PersistentBase):
             self.name = data["name"]
             self.quantity = data["quantity"]
             self.category = data["category"]
+            self.price = data["price"]
             self.note = data.get("note", "")
             self.is_favorite = data.get("is_favorite", False)
 
@@ -82,6 +85,36 @@ class Items(db.Model, PersistentBase):
             ) from error
 
         return self
+
+    @classmethod
+    def find_by_price(cls, wishlist_id, price):
+        """Returns all Wishlists with the given name
+
+        Args:
+            price (float): the price  of the Wishlists item you want to match
+        """
+        logger.info(
+            "Processing query for wishlist_id=%s and price=%s ...", wishlist_id, price
+        )
+        return cls.query.filter(
+            cls.wishlist_id == wishlist_id, cls.price == price
+        ).all()
+
+    @classmethod
+    def find_by_category(cls, wishlist_id, category):
+        """Returns all Wishlists with the given name
+
+        Args:
+            category (string): the category of the Wishlists item you want to match
+        """
+        logger.info(
+            "Processing query for wishlist_id=%s and price=%s ...",
+            wishlist_id,
+            category,
+        )
+        return cls.query.filter(
+            cls.wishlist_id == wishlist_id, cls.category == category
+        ).all()
 
     @classmethod
     def find_by_favorite(cls, wishlist_id, is_favorite: bool = True) -> list:

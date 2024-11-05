@@ -67,7 +67,7 @@ class PersistentBase:
         """
         logger.info("Updating %s", self)
         # print(f"ID CHECK : {self.id}")
-        if not self.id:
+        if self.id is None:
             raise DataValidationError("Update called with empty ID field")
         try:
             db.session.commit()

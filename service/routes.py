@@ -335,30 +335,33 @@ def get_all_items(wishlist_id):
     """
     Get all Items in WL
     """
+    category = request.args.get("category")
+    price = request.args.get("price", type=float)
+    is_favorite = request.args.get("is_favorite")
     app.logger.info("Request to create an Item for Wishlist with id: %s", wishlist_id)
-    # See if the wishlist exists and abort if it doesn't
     wishlist = Wishlist.find(wishlist_id)
     if not wishlist:
         abort(
             status.HTTP_404_NOT_FOUND,
             f"Wishlist with id '{wishlist_id}' could not be found.",
         )
-
-    items = []
-
-    is_favorite = request.args.get("is_favorite")
-    # Parse any arguments from the query string
-    if is_favorite:
+    if category:
+        app.logger.info("Filtering by category: %s", category)
+        items = Items.find_by_category(wishlist_id=wishlist_id, category=category)
+    elif price is not None:
+        app.logger.info("Filtering by price: %s", price)
+        items = Items.find_by_price(wishlist_id=wishlist_id, price=price)
+    elif is_favorite:
         app.logger.info("Find by is_favorite: %s", is_favorite)
         # create bool from string
         is_favorite_value = is_favorite.lower() in ["true", "yes", "1"]
         items = Items.find_by_favorite(wishlist_id, is_favorite_value)
     else:
-        app.logger.info("Find all")
+        app.logger.info("Retrieving all items in wishlist")
         items = Items.all()
-    results = [item.serialize() for item in items]
-    app.logger.info("Returning %d Items", len(results))
 
+    results = [item.serialize() for item in items]
+    app.logger.info("[%s] Items returned", len(results))
     return jsonify(results), status.HTTP_200_OK
 
 
