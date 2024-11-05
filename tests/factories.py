@@ -2,10 +2,11 @@
 Test Factory to make fake objects for testing
 """
 
+import random
 from faker import Faker as FK
 from factory import Factory, SubFactory, Sequence, Faker, LazyAttribute
 from service.models import Wishlist, Items
-import random
+
 
 test = FK()
 
