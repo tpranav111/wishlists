@@ -63,7 +63,6 @@ class Wishlist(db.Model, PersistentBase):
             data (dict): A dictionary containing the resource data
         """
         try:
-            self.id = data["id"]
             self.name = data["name"]
             self.updated_time = data["updated_time"]
             self.note = data["note"]
