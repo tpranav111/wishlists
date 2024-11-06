@@ -66,7 +66,6 @@ class Items(db.Model, PersistentBase):
         Deserializes an Item from a dictionary
         """
         try:
-            self.id = data["id"]
             self.name = data["name"]
             self.quantity = data["quantity"]
             self.category = data["category"]

@@ -51,8 +51,7 @@ class PersistentBase:
         """
         logger.info("Creating %s", self)
         # id must be none to generate next primary key
-        # remove this in order to create self-assigned wishlist and items id
-        # self.id = None
+        self.id = None
         try:
             db.session.add(self)
             db.session.commit()
