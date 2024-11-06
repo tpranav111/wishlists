@@ -37,6 +37,9 @@ class DataValidationError(Exception):
 class PersistentBase:
     """Base class added persistent methods"""
 
+    def __init__(self):
+        self.id = None  # pylint: disable=invalid-name
+
     @abstractmethod
     def serialize(self) -> dict:
         """Convert an object into a dictionary"""
@@ -51,7 +54,7 @@ class PersistentBase:
         """
         logger.info("Creating %s", self)
         # id must be none to generate next primary key
-        self.id = None
+        # self.id = None
         try:
             db.session.add(self)
             db.session.commit()
