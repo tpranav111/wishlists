@@ -52,6 +52,9 @@ run: ## Run the service
 cluster: ## Create a K3D Kubernetes cluster with load balancer and registry
 	$(info Creating Kubernetes cluster $(CLUSTER) with a registry and 2 worker nodes...)
 	k3d cluster create $(CLUSTER) --agents 2 --registry-create cluster-registry:0.0.0.0:5000 --port '8080:80@loadbalancer'
+	$(info Adding cluster-registry entry to /etc/hosts...)
+	sudo bash -c "echo '127.0.0.1 cluster-registry' >> /etc/hosts"
+
 
 .PHONY: cluster-rm
 cluster-rm: ## Remove a K3D Kubernetes cluster
