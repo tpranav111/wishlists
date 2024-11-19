@@ -33,10 +33,16 @@ from service.common import status  # HTTP Status Codes
 ######################################################################
 @app.route("/health")
 def health_check():
-    """Let them know our heart is still beating"""
+    """Health check endpoint: Let them know our heart is still beating"""
     return jsonify(status=200, message="Healthy"), status.HTTP_200_OK
 
 
+# or
+# @app.route("/health", methods=["GET"])
+# def health():
+#    """Health check endpoint: Let them know our heart is still beating"""
+#    app.logger.info("Health check endpoint called")
+#    return jsonify({"status": "OK"}), status.HTTP_200_OK
 ######################################################################
 # GET INDEX
 ######################################################################
