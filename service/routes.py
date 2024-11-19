@@ -43,12 +43,7 @@ def health_check():
 @app.route("/")
 def index():
     """Root URL response"""
-    return (
-        """Wishlists REST API Service: The Wishlists service allows users to save items they are
-            interested in but not yet ready to purchase. You can access details about wishlists
-            (/wishlists) and items ((/wishlists/ { wishlist_id }/items)) within each wishlist.""",
-        status.HTTP_200_OK,
-    )
+    return app.send_static_file("index.html")
     # return app.send_static_file("index.html")
 
 
