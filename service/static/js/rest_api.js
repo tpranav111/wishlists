@@ -8,14 +8,16 @@ $(function () {
     function update_form_data(res) {
         $("#wishlist_id").val(res.id);
         $("#wishlist_name").val(res.name);
-        $("#wishlist_category").val(res.category);
-        if (res.available == true) {
+        $("#wishlist_category").val(res.items[0].category);
+
+        $("#wishlist_note").val(res.note);
+
+        if (res.is_favorite == true) {
             $("#wishlist_favorite").val("true");
         } else {
             $("#wishlist_favorite").val("false");
         }
-        $("#wishlist_note").val(res.note);
-        $("#wishlist_favorite").val(res.is_favorite);
+        $("#wishlist_update").val(res.updated_time);
     }
 
     /// Clears all form fields
@@ -40,5 +42,30 @@ $(function () {
         clear_form_data()
     });
 
+    // Retrieve a Wishlist*
+    $("#retrieve-btn").click(function () {
 
+        let wishlist_id = $("#wishlist_id").val();
+
+        $("#flash_message").empty();
+
+        let ajax = $.ajax({
+            type: "GET",
+            url: `/wishlists/${wishlist_id}`,
+            contentType: "application/json",
+            data: ''
+        })
+
+        ajax.done(function(res){
+            //alert(res.toSource())
+            update_form_data(res)
+            flash_message("Success")
+        });
+
+        ajax.fail(function(res){
+            clear_form_data()
+            flash_message(res.responseJSON.message)
+        });
+
+    });
 })
