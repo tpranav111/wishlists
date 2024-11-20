@@ -23,7 +23,7 @@
 
       <!-- FORM -->
       <div class="col-md-12" id="form_data">
-        <h3>Create, Retrieve, Update, and Delete a Wishlist:</h3>
+        <h3>Create, Search, Update, and Delete a Wishlist:</h3>
         <div class="well">
           <div class="form-horizontal">
             <div class="form-group">
@@ -32,8 +32,8 @@
                 <input type="text" class="form-control" id="wishlist_id" placeholder="Enter ID of Wishlist">
               </div>
               <div class="col-sm-4">
-                <button type="submit" class="btn btn-primary" id="retrieve-btn">Retrieve</button>
-                <button type="submit" class="btn btn-danger" id="delete-btn">Delete</button>
+                <button type="submit" class="btn btn-primary" id="wishlist_retrieve_btn">Retrieve Wishlist</button>
+                <button type="submit" class="btn btn-danger" id="wishlist_delete_btn">Delete Wishlist</button>
               </div>
             </div>
           </div> <!-- form horizontal -->
@@ -56,20 +56,12 @@
               </div>
             </div>
             -->
-
-            <!-- CATEGORY -->
-            <div class="form-group">
-              <label class="control-label col-sm-2" for="wishlist_category">Category:</label>
-              <div class="col-sm-10">
-                <input type="text" class="form-control" id="wishlist_category" placeholder="Enter category for Wishlist">
-              </div>
-            </div>
             
             <!-- NOTE -->
             <div class="form-group">
               <label class="control-label col-sm-2" for="wishlist_note">Note:</label>
               <div class="col-sm-10">
-                <input type="text" class="form-control" id="wishlist_note" placeholder="Enter category for Wishlist">
+                <input type="text" class="form-control" id="wishlist_note" placeholder="Enter note for Wishlist">
               </div>
             </div>
 
@@ -97,10 +89,10 @@
             <!-- SUBMIT BUTTONS -->
             <div class="form-group">
               <div class="col-sm-offset-2 col-sm-10">
-                <button type="submit" class="btn btn-primary" id="search-btn">Search</button>
-                <button type="submit" class="btn btn-primary" id="clear-btn">Clear</button>
-                <button type="submit" class="btn btn-success" id="create-btn">Create</button>
-                <button type="submit" class="btn btn-warning" id="update-btn">Update</button>
+                <button type="submit" class="btn btn-primary" id="wishlist_search_btn">Search Wishlist</button>
+                <button type="submit" class="btn btn-primary" id="wishlist_clear_btn">Clear Wishlist</button>
+                <button type="submit" class="btn btn-success" id="wishlist_create_btn">Create Wishlist</button>
+                <button type="submit" class="btn btn-warning" id="wishlist_update_btn">Update Wishlist</button>
               </div>
             </div>
           </div> <!-- form horizontal -->
@@ -125,12 +117,125 @@
         </table>
       </div>
 
+      <br>
+      <hr>
+      <br>
+
+      <!-- FORM -->
+      <div class="col-md-12" id="form_data">
+        <h3>Create, Search, Update, and Delete an Item:</h3>
+        <div class="well">
+          <div class="form-horizontal">
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="item_id">Item ID:</label>
+              <div class="col-sm-6">
+                <input type="text" class="form-control" id="wishlist_id" placeholder="Enter ID of Item">
+              </div>
+              <div class="col-sm-4">
+                <button type="submit" class="btn btn-primary" id="item_retrieve_btn">Retrieve</button>
+                <button type="submit" class="btn btn-danger" id="item_delete_btn">Delete</button>
+              </div>
+            </div>
+          </div> <!-- form horizontal -->
+
+          <div class="form-horizontal">
+
+            <!-- NAME -->
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="item_name">Name:</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control" id="item_name" placeholder="Enter name for Item">
+              </div>
+            </div>
+
+            <!-- CUSTOMER NAME 
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="wishlist_name">Customer Name:</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control" id="customer_name" placeholder="Enter name for Customer">
+              </div>
+            </div>
+            -->
+
+            <!-- CATEGORY -->
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="wishlist_category">Category:</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control" id="item_category" placeholder="Enter category for Item">
+              </div>
+            </div>
+            
+            <!-- NOTE -->
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="item_note">Note:</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control" id="item_note" placeholder="Enter note for Item">
+              </div>
+            </div>
+
+            <!-- AVAILABLE -->
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="wishlist_favorite">Favorite:</label>
+              <div class="col-sm-10">
+                <select class="form-control" id="wishlist_favorite">
+                  <option value="true" selected>True</option>
+                  <option value="false">False</option>
+                </select>
+              </div>
+            </div>
+
+
+            <!-- UPDATE TIME -->
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="wishlist_update">Update-time:</label>
+              <div class="col-sm-10">
+                <input type="date" class="form-control" id="wishlist_update" placeholder="2020-04-01">
+              </div>
+            </div>
+
+
+            <!-- SUBMIT BUTTONS -->
+            <div class="form-group">
+              <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-primary" id="item_search_btn">Search Item</button>
+                <button type="submit" class="btn btn-primary" id="item_clear_btn">Delete Item</button>
+                <button type="submit" class="btn btn-success" id="item_create_btn">Create Item</button>
+                <button type="submit" class="btn btn-warning" id="item_update_btn">Update Item</button>
+              </div>
+            </div>
+          </div> <!-- form horizontal -->
+        </div> <!-- end well -->
+      </div> <!-- end Form -->
+
+      <!-- Search Results -->
+      <div class="table-responsive col-md-12" id="search_results">
+        <table class="table table-striped">
+          <thead>
+          <tr>
+            <th class="col-md-1">ID</th>
+            <th class="col-md-4">Customer Name</th>
+            <th class="col-md-4">Product ID</th>
+            <th class="col-md-3">Product Name</th>
+            <th class="col-md-3">Note</th>
+            <th class="col-md-3">Price</th>
+            <th class="col-md-3">Quantity</th>
+            <th class="col-md-3">Is Favorite?</th>
+          </tr>
+          </thead>
+        </table>
+      </div>
+
+
+
+
       <footer>
         <br><br>
-        <p>&copy; NYU DevOps Company 2022</p>
+        <p>&copy; NYU DevOps Company 2024</p>
       </footer>
 
     </div> <!-- container -->
+
+    
 
   <script type="text/javascript" src = "static/js/jquery-3.6.0.min.js"></script>
   <script type="text/javascript" src = "static/js/bootstrap.min.js"></script>
