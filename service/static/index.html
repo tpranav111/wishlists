@@ -129,7 +129,7 @@
             <div class="form-group">
               <label class="control-label col-sm-2" for="item_id">Item ID:</label>
               <div class="col-sm-6">
-                <input type="text" class="form-control" id="wishlist_id" placeholder="Enter ID of Item">
+                <input type="text" class="form-control" id="item_id" placeholder="Enter ID of Item">
               </div>
               <div class="col-sm-4">
                 <button type="submit" class="btn btn-primary" id="item_retrieve_btn">Retrieve</button>
@@ -139,6 +139,13 @@
           </div> <!-- form horizontal -->
 
           <div class="form-horizontal">
+            
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="desired_item_wishlist">Desired Wishlist Name:</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control" id="desired_item_wishlist" placeholder="Enter category for Item">
+              </div>
+            </div>
 
             <!-- NAME -->
             <div class="form-group">
@@ -147,7 +154,7 @@
                 <input type="text" class="form-control" id="item_name" placeholder="Enter name for Item">
               </div>
             </div>
-
+            
             <!-- CUSTOMER NAME 
             <div class="form-group">
               <label class="control-label col-sm-2" for="wishlist_name">Customer Name:</label>
@@ -159,7 +166,7 @@
 
             <!-- CATEGORY -->
             <div class="form-group">
-              <label class="control-label col-sm-2" for="wishlist_category">Category:</label>
+              <label class="control-label col-sm-2" for="item_category">Category:</label>
               <div class="col-sm-10">
                 <input type="text" class="form-control" id="item_category" placeholder="Enter category for Item">
               </div>
@@ -175,9 +182,9 @@
 
             <!-- AVAILABLE -->
             <div class="form-group">
-              <label class="control-label col-sm-2" for="wishlist_favorite">Favorite:</label>
+              <label class="control-label col-sm-2" for="item_favorite">Favorite:</label>
               <div class="col-sm-10">
-                <select class="form-control" id="wishlist_favorite">
+                <select class="form-control" id="item_favorite">
                   <option value="true" selected>True</option>
                   <option value="false">False</option>
                 </select>
@@ -187,9 +194,9 @@
 
             <!-- UPDATE TIME -->
             <div class="form-group">
-              <label class="control-label col-sm-2" for="wishlist_update">Update-time:</label>
+              <label class="control-label col-sm-2" for="item_update">Update-time:</label>
               <div class="col-sm-10">
-                <input type="date" class="form-control" id="wishlist_update" placeholder="2020-04-01">
+                <input type="date" class="form-control" id="item_update" placeholder="2020-04-01">
               </div>
             </div>
 
