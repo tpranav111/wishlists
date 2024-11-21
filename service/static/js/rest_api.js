@@ -67,7 +67,7 @@ $(function () {
     // WISHLIST //
 
     // Retrieve a Wishlist
-    $("#retrieve-btn").click(function () {
+    $("#wishlist_retrieve_btn").click(function () {
 
         let wishlist_id = $("#wishlist_id").val();
 
@@ -180,6 +180,59 @@ $(function () {
         clear_form_data();
     });
 
+    // Search for a WL*
+    // ****************************************
+
+    $("#wishlist_search_btn").click(function () {
+
+        let name = $("#wishlist_name").val();
+        let category = $("#pet_category").val();
+        let available = $("#pet_available").val() == "true";
+
+        $("#flash_message").empty();
+
+        let ajax = $.ajax({
+            type: "GET",
+            url: `/wishlists`,
+            contentType: "application/json",
+            data: ''
+        })
+
+        ajax.done(function(res){
+            //alert(res.toSource())
+            $("#search_results").empty();
+            let table = '<table class="table table-striped" cellpadding="10">'
+            table += '<thead><tr>'
+            table += '<th class="col-md-2">ID</th>'
+            table += '<th class="col-md-2">Name</th>'
+            table += '<th class="col-md-2">Note</th>'
+            table += '<th class="col-md-2">Favorite?</th>'
+            table += '<th class="col-md-2">Updated Time</th>'
+            table += '</tr></thead><tbody>'
+            let firstWL = "";
+            for(let i = 0; i < res.length; i++) {
+                let WL = res[i];
+                table +=  `<tr id="row_${i}"><td>${WL.id}</td><td>${WL.name}</td><td>${WL.note}</td><td>${WL.is_favorite}</td><td>${WL.updated_time}</td><td>`;
+                if (i == 0) {
+                    firstWL = WL;
+                }
+            }
+            table += '</tbody></table>';
+            $("#search_results").append(table);
+            //flash_message(str(firstWL))
+            // copy the first result to the form
+            if (firstWL != "") {
+                update_wishlist_data(firstWL)
+            }
+
+            flash_message("Success")
+        });
+
+        ajax.fail(function(res){
+            flash_message(res.responseJSON.message)
+        });
+
+    });
 
     // ITEM //
 
