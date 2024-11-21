@@ -18,7 +18,7 @@ $(function () {
         $("#wishlist_update").val(res.updated_time);
     }
 
-    /// Clears all form fields
+    // Clears all form fields
     function clear_wishlist_data() {
         $("#wishlist_name").val("");
         $("#customer_name").val("");
@@ -45,7 +45,7 @@ $(function () {
         $("#item_update").val(res.updated_time);
     }
 
-    /// Clears all form fields
+    // Clear all form fields
     function clear_item_data() {
         $("#item_name").val("");
         $("#customer_name").val("");
@@ -57,17 +57,14 @@ $(function () {
         $("#item_quantity").val("");
     }
     
-    // Updates the flash message area
+    // Update the flash message area
     function flash_message(message) {
         $("#flash_message").empty();
         $("#flash_message").append(message);
     }
 
-    $("#clear-btn").click(function () {
-        $("#wishlist_id").val("");
-        $("#flash_message").empty();
-        clear_form_data()
-    });
+
+    // WISHLIST //
 
     // Retrieve a Wishlist
     $("#retrieve-btn").click(function () {
@@ -83,7 +80,7 @@ $(function () {
             data: ''
         })
 
-        ajax.done(function(res){
+        ajax.done(function(res) {
             //alert(res.toSource())
             update_wishlist_data(res)
             flash_message("Success")
@@ -133,10 +130,61 @@ $(function () {
 
     });
 
+    // Update the Wishlist
+    $("#wishlist_update_btn").click(function () {
+        let wishlist_id = $("#wishlist_id").val();
+        let name = $("#wishlist_name").val();
+        let note = $("#wishlist_note").val();
+        let update = $("#wishlist_update").val(); 
+        let is_favorite = $("#item_favorite").prop("checked");
+
+
+        
+        
+        $("#flash_message").empty();
+        
+        if (!wishlist_id) {
+            alert("Wishlist ID is required to update the resource.");
+            return;
+        }
+        
+        let ajax = $.ajax({
+            type: "PUT",
+            url: `/wishlists/${wishlist_id}`,
+            contentType: "application/json",
+            data: JSON.stringify({
+                name: name,
+                note: note,
+                updated_time: update,
+                items: [],
+                is_favorite: is_favorite
+            })
+        });
+
+        ajax.done(function(res){
+            update_wishlist_data(res)
+            flash_message("Success: Update the Wishlist")
+        });
+
+        ajax.fail(function(res){
+            clear_wishlist_data()
+            flash_message(res.responseJSON.message)
+        });
+
+    });
+
+    // Clear the wishlist interface
+    $("#wishlist_clear_int_btn").click(function () {
+        $("#wishlist_id").val("");
+        $("#flash_message").empty();
+        clear_form_data();
+    });
+
+
+    // ITEM //
 
     // Create an Item
     $("#item_create_btn").click(function () {
-
         let name = $("#item_name").val();
         let category = $("#item_category").val();
         let quantity = $("#item_quantity").val();
@@ -174,5 +222,54 @@ $(function () {
             flash_message(res.responseJSON.message)
         });
 
+    });
+
+    // Update an Item
+    $("#item_update_btn").click(function () {
+        let item_id = $("#item_id").val();
+        let name = $("#item_name").val();
+        let category = $("#item_category").val();
+        let quantity = $("#item_quantity").val();
+        let price = $("#item_price").val();
+        let update = $("#item_update").val();
+        let note = $("#item_note").val();
+        let is_favorite = $("#item_favorite").prop("checked");
+        let wishlist_id = $("#desired_item_wishlist").val();
+    
+        $("#flash_message").empty();
+        
+        let ajax = $.ajax({
+            type: "PUT",
+            url: `/wishlists/${wishlist_id}/items/${item_id}`,
+            contentType: "application/json",
+            data: JSON.stringify({
+                name: name,
+                category: category,
+                quantity: quantity,
+                price: price,
+                note: note,
+                updated_time: update,
+                is_favorite: is_favorite
+            })
+        });
+
+        ajax.done(function(res){
+            //alert(res.toSource())
+            update_item_data(res)
+            flash_message("Success: Update an Item")
+        });
+
+        ajax.fail(function(res){
+            clear_item_data()
+            flash_message(res.responseJSON.message)
+        });
+
+    });
+
+     // Clear the items interface
+     $("#item_clear_int_btn").click(function () {
+        $("#item_id").val("");
+        $("#flash_message").empty();
+        clear_form_data();
     });
 })
