@@ -336,16 +336,30 @@ def get_all_items(wishlist_id):
     """
     Get all Items in WL
     """
+    item_name = request.args.get("name", default=None)
     category = request.args.get("category")
     price = request.args.get("price", type=float)
     is_favorite = request.args.get("is_favorite")
     app.logger.info("Request to create an Item for Wishlist with id: %s", wishlist_id)
     wishlist = Wishlist.find(wishlist_id)
+    items = wishlist.items
     if not wishlist:
         abort(
             status.HTTP_404_NOT_FOUND,
             f"Wishlist with id '{wishlist_id}' could not be found.",
         )
+    if item_name:
+        app.logger.info("Searching for item by name: %s", item_name)
+        # Convert `items` to a list of serialized dictionaries temporarily for name filtering
+        filtered_items = [
+            item.serialize() for item in items if item.name.lower() == item_name.lower()
+        ]
+        if not filtered_items:
+            abort(
+                status.HTTP_404_NOT_FOUND,
+                f"Item with name '{item_name}' could not be found in Wishlist with id '{wishlist_id}'.",
+            )
+
     if category:
         app.logger.info("Filtering by category: %s", category)
         items = Items.find_by_category(wishlist_id=wishlist_id, category=category)
@@ -490,26 +504,26 @@ def cancel_wishlist_favorite(wishlist_id):
     return jsonify(wishlist.serialize()), status.HTTP_200_OK
 
 
-# search item using query str
-@app.route("/wishlists/<int:wishlist_id>/items/name", methods=["GET"])
-def search_items(wishlist_id):
-    """
-    Search Item by name in given WL
-    """
-    wishlist = Wishlist.find(wishlist_id)
-    if not wishlist:
-        abort(
-            status.HTTP_404_NOT_FOUND,
-            f"Wishlist with id '{wishlist_id}' could not be found.",
-        )
+# # search item using query str
+# @app.route("/wishlists/<int:wishlist_id>/items/name", methods=["GET"])
+# def search_items(wishlist_id):
+#     """
+#     Search Item by name in given WL
+#     """
+#     wishlist = Wishlist.find(wishlist_id)
+#     if not wishlist:
+#         abort(
+#             status.HTTP_404_NOT_FOUND,
+#             f"Wishlist with id '{wishlist_id}' could not be found.",
+#         )
 
-    item_name = request.args.get("search", default="")
+#     item_name = request.args.get("search", default="")
 
-    for itm in wishlist.serialize()["items"]:
-        if itm["name"] == item_name:
-            return itm, status.HTTP_200_OK
+#     for itm in wishlist.serialize()["items"]:
+#         if itm["name"] == item_name:
+#             return itm, status.HTTP_200_OK
 
-    abort(
-        status.HTTP_404_NOT_FOUND,
-        f"Item '{item_name}' could not be found in id '{wishlist_id}'  :(",
-    )
+#     abort(
+#         status.HTTP_404_NOT_FOUND,
+#         f"Item '{item_name}' could not be found in id '{wishlist_id}'  :(",
+#     )
