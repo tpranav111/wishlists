@@ -235,6 +235,33 @@ $(function () {
 
     });
 
+        // ****************************************
+    // Delete a Wishlist
+    // ****************************************
+
+    $("#wishlist_delete_btn").click(function () {
+
+        let id = $("#wishlist_id").val();
+
+        $("#flash_message").empty();
+
+        let ajax = $.ajax({
+            type: "DELETE",
+            url: `/wishlists/${id}`,
+            contentType: "application/json",
+            data: '',
+        })
+
+        ajax.done(function(res){
+            clear_form_data()
+            flash_message("Success")
+        });
+
+        ajax.fail(function(res){
+            flash_message("Server error!")
+        });
+    });
+
     // ITEM //
 
     // Create an Item
@@ -396,6 +423,30 @@ $(function () {
             flash_message(res.responseJSON.message)
         });
 
+    });
+    //Delete items
+    $("#item_delete_btn").click(function () {
+
+        let id = $("#item_id").val();
+        let wishlist_id = $("#desired_item_wishlist").val();
+
+        $("#flash_message").empty();
+
+        let ajax = $.ajax({
+            type: "DELETE",
+            url: `/wishlists/${wishlist_id}/items/${item_id}`,
+            contentType: "application/json",
+            data: '',
+        })
+
+        ajax.done(function(res){
+            clear_form_data()
+            flash_message("Success")
+        });
+
+        ajax.fail(function(res){
+            flash_message("Server error!")
+        });
     });
 
      // Clear the items interface
