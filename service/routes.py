@@ -26,6 +26,7 @@ from flask import jsonify, request, abort, url_for
 from flask import current_app as app  # Import Flask application
 from service.models import Wishlist, Items
 from service.common import status  # HTTP Status Codes
+from service.models import db  # or wherever db is initialized
 
 
 ######################################################################
@@ -513,3 +514,47 @@ def search_items(wishlist_id):
         status.HTTP_404_NOT_FOUND,
         f"Item '{item_name}' could not be found in id '{wishlist_id}'  :(",
     )
+
+
+# Set a new route to make query for the items that match the query attributes
+@app.route("/items", methods=["GET"])
+def query_all_items():
+    """
+    Query items across all wishlists by multiple attributes.
+    """
+    # Extract query parameters
+    filters = {
+        "name": request.args.get("name"),
+        "category": request.args.get("category"),
+        "price": request.args.get("price", type=float),
+        "updated_time": request.args.get("updated_time"),
+        "is_favorite": request.args.get(
+            "is_favorite", type=lambda x: x.lower() in ["true", "1", "yes"]
+        ),
+    }
+
+    app.logger.info("Querying items with filters: %s", filters)
+
+    # Start making the query
+    query = db.session.query(Items)
+
+    # Apply the filters for the query
+    if filters["name"]:
+        query = query.filter(Items.name.ilike(f"%{filters['name']}%"))
+    if filters["category"]:
+        query = query.filter(Items.category.ilike(f"%{filters['category']}%"))
+    if filters["price"] is not None:
+        query = query.filter(Items.price == filters["price"])
+    if filters["updated_time"]:
+        query = query.join(Wishlist).filter(
+            Wishlist.updated_time == filters["updated_time"]
+        )
+    if filters["is_favorite"] is not None:
+        query = query.filter(Items.is_favorite == filters["is_favorite"])
+
+    items = query.all()
+
+    results = [item.serialize() for item in items]
+
+    app.logger.info("Found %d items with the provided filters", len(results))
+    return jsonify(results), status.HTTP_200_OK
