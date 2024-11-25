@@ -352,36 +352,36 @@ $(function () {
 
         let I_name = $("#item_name").val();
         let wish_id = $("#desired_item_wishlist").val();
-        //let available = $("#pet_available").val() == "true";
+        let category = $("#item_category").val(); 
+        let price = $("#item_price").val();
 
         let queryString = ""
 
-        //if (I_name) {
-        queryString += 'search=' + I_name
-        flash_message(queryString)
-        //}
-        /*
+        if (!wishlist_id) {
+            flash_message("Please provide a Wishlist ID.");
+            return;
+        }
+
+        if (I_name) {
+            queryString += "name=" + encodeURIComponent(name);
+        }
         if (category) {
-            if (queryString.length > 0) {
-                queryString += '&category=' + category
-            } else {
-                queryString += 'category=' + category
-            }
+            queryString += "category=" + encodeURIComponent(category);
         }
-        if (available) {
+        if (price) {
             if (queryString.length > 0) {
-                queryString += '&available=' + available
-            } else {
-                queryString += 'available=' + available
+                queryString += "&";
             }
+            queryString += "price=" + encodeURIComponent(price);
         }
-        */
+        flash_message(queryString)
+
         $("#flash_message").empty();
 
         let ajax = $.ajax({
             type: "GET",
             //url: `/pets?${queryString}`,
-            url: `/wishlists/${wish_id}/items/name?${queryString}`,
+            url: `/wishlists/${wish_id}/items${queryString}`,
             contentType: "application/json",
             data: ''
         })
@@ -495,5 +495,82 @@ $(function () {
         $("#item_id").val("");
         $("#flash_message").empty();
         clear_form_data();
+    });
+
+    $("#item_search_btn").click(function () {
+        let wishlist_id = $("#wishlist_id").val(); 
+        let category = $("#item_category").val(); 
+        let price = $("#item_price").val();  
+        let name = $("#item_name").val();     
+
+        if (!wishlist_id) {
+            flash_message("Please provide a Wishlist ID.");
+            return;
+        }
+    
+        let queryString = "";
+        if (name) {
+            queryString += "name=" + encodeURIComponent(name);
+        }
+        if (category) {
+            queryString += "category=" + encodeURIComponent(category);
+        }
+        if (price) {
+            if (queryString.length > 0) {
+                queryString += "&";
+            }
+            queryString += "price=" + encodeURIComponent(price);
+        }
+    
+        $("#flash_message").empty();
+    
+        let ajax = $.ajax({
+            type: "GET",
+            url: `/wishlists/${wishlist_id}/items?${queryString}`, // Use the specified route
+            contentType: "application/json",
+            data: "",
+        });
+    
+        ajax.done(function (res) {
+            $("#search_results").empty();
+    
+            let table = `
+                <table class="table table-striped" cellpadding="10">
+                    <thead>
+                        <tr>
+                            <th class="col-md-2">Item ID</th>
+                            <th class="col-md-2">Name</th>
+                            <th class="col-md-2">Category</th>
+                            <th class="col-md-2">Price</th>
+                            <th class="col-md-2">Quantity</th>
+                            <th class="col-md-2">Wishlist ID</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+    
+            for (let i = 0; i < res.length; i++) {
+                let item = res[i];
+                table += `
+                    <tr id="row_${i}">
+                        <td>${item.id}</td>
+                        <td>${item.name}</td>
+                        <td>${item.category}</td>
+                        <td>${item.price}</td>
+                        <td>${item.quantity}</td>
+                        <td>${item.wishlist_id}</td>
+                    </tr>
+                `;
+            }
+            table += "</tbody></table>";
+            $("#search_results").append(table);
+    
+            flash_message("Items retrieved successfully!");
+        });
+    
+        ajax.fail(function (res) {
+            const errorMessage = res.responseJSON?.message || "Error occurred while fetching results.";
+            flash_message(errorMessage);
+        });
     });
 })
