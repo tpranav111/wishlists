@@ -180,7 +180,7 @@ $(function () {
         clear_form_data();
     });
 
-    // Search for a WL*
+    // Search for a WL
     // ****************************************
 
     $("#wishlist_search_btn").click(function () {
@@ -235,7 +235,7 @@ $(function () {
 
     });
 
-        // ****************************************
+    // ****************************************
     // Delete a Wishlist
     // ****************************************
 
@@ -264,7 +264,7 @@ $(function () {
 
     // ITEM //
 
-    // Create an Item
+    // CREATE an Item in the wishlist
     $("#item_create_btn").click(function () {
         let name = $("#item_name").val();
         let category = $("#item_category").val();
@@ -305,7 +305,7 @@ $(function () {
 
     });
 
-    // Update an Item
+    // UPDATE an Item in the wishlist
     $("#item_update_btn").click(function () {
         let item_id = $("#item_id").val();
         let name = $("#item_name").val();
@@ -346,7 +346,8 @@ $(function () {
         });
 
     });
-    //list items
+
+    // LIST items in the wishlist
     $("#item_search_btn").click(function () {
 
         let I_name = $("#item_name").val();
@@ -424,7 +425,8 @@ $(function () {
         });
 
     });
-    //Delete items
+
+    // DELETE items in the wishlist
     $("#item_delete_btn").click(function () {
 
         let id = $("#item_id").val();
@@ -449,7 +451,46 @@ $(function () {
         });
     });
 
-     // Clear the items interface
+    // QUERY all the items in different wishlists
+    $("#item_query_btn").click(function () {
+        let name = $("#item_name").val();
+        let category = $("#item_category").val();
+        let quantity = $("#item_quantity").val();
+        let price = $("#item_price").val();
+        let update = $("#item_update").val();
+        let is_favorite = $("#item_favorite").prop("checked");
+        
+        $("#flash_message").empty();
+    
+        // Build the query string dynamically
+        let queryParams = [];
+        if (name) queryParams.push(`name=${encodeURIComponent(name)}`);
+        if (category) queryParams.push(`category=${encodeURIComponent(category)}`);
+        if (quantity) queryParams.push(`quantity=${encodeURIComponent(quantity)}`);
+        if (price) queryParams.push(`price=${encodeURIComponent(price)}`);
+        if (update) queryParams.push(`updated_time=${encodeURIComponent(update)}`);
+        if (is_favorite) queryParams.push(`is_favorite=${is_favorite}`);
+    
+        let queryString = queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
+    
+        let ajax = $.ajax({
+            type: "GET",
+            url: `/items${queryString}`,
+            contentType: "application/json"
+        });
+    
+        ajax.done(function (res) {
+            console.log("Query Results:", res);
+            $("#flash_message").text(`Found ${res.length} items matching the criteria`);
+        });
+    
+        ajax.fail(function (xhr, status, error) {
+            console.error("Query Failed:", error);
+            $("#flash_message").text(`Error querying items: ${xhr.responseText}`);
+        });
+    });
+    
+     // CLEAR the items interface
      $("#item_clear_int_btn").click(function () {
         $("#item_id").val("");
         $("#flash_message").empty();
