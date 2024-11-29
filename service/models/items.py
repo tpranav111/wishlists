@@ -132,7 +132,7 @@ class Items(db.Model, PersistentBase):
         return cls.query.filter(
             cls.wishlist_id == wishlist_id, cls.is_favorite == is_favorite
         )
-    
+
     @classmethod
     def query(cls, **kwargs):
         logger.info("Querying items with filters: %s", kwargs)
