@@ -15,13 +15,14 @@
 ######################################################################
 
 """
-Pet Steps
+Wishlist Steps
 
 Steps file for Pet.feature
 
 For information on Waiting until elements are present in the HTML see:
     https://selenium-python.readthedocs.io/waits.html
 """
+from datetime import datetime
 import requests
 from compare3 import expect
 from behave import given  # pylint: disable=no-name-in-module
@@ -42,52 +43,35 @@ def step_impl(context):
     rest_endpoint = f"{context.base_url}/wishlists"
     context.resp = requests.get(rest_endpoint, timeout=WAIT_TIMEOUT)
     expect(context.resp.status_code).equal_to(HTTP_200_OK)
-    # and delete them one by one
+
+    # Delete existing wishlists
     for wishlist in context.resp.json():
         context.resp = requests.delete(
             f"{rest_endpoint}/{wishlist['id']}", timeout=WAIT_TIMEOUT
         )
         expect(context.resp.status_code).equal_to(HTTP_204_NO_CONTENT)
 
-    # load the database with new wishlists
+    # Load the database with new wishlists
     for row in context.table:
+        # Convert `updated_time` to required format
+        try:
+            formatted_time = datetime.strptime(
+                row["updated_time"], "%Y-%m-%d"
+            ).strftime("%a, %d %b %Y %H:%M:%S GMT")
+        except ValueError as e:
+            raise ValueError(
+                f"Invalid date format in 'updated_time': {row['updated_time']}"
+            ) from e
+
         payload = {
-            "customer_name": row["customer_name"],
-        }
-        context.resp = requests.post(rest_endpoint, json=payload, timeout=WAIT_TIMEOUT)
-        expect(context.resp.status_code).equal_to(HTTP_201_CREATED)
-
-
-@given("the following items")
-def step_impl(context):
-    """Delete all Items and load new ones"""
-    rest_endpoint = f"{context.base_url}/wishlists"
-    # all items were already deleted when wishlists were deleted
-
-    # load the database with new items, connected back to wishlists
-    for row in context.table:
-
-        context.resp = requests.get(
-            rest_endpoint,
-            params={"customer-name": row["customer_name"]},
-            timeout=WAIT_TIMEOUT,
-        )
-        expect(context.resp.status_code).equal_to(HTTP_200_OK)
-        expect(len(context.resp.json())).equal_to(1)
-        wishlist_id = int(context.resp.json()[0]["id"])
-
-    # load the database with new wishlists
-    for row in context.table:
-        payload = {
-            "wishlist_id": wishlist_id,
             "name": row["name"],
-            "category": row["category"],
-            "quantity": int(row["quantity"]),
+            "updated_time": formatted_time,  # Use the formatted date
             "note": row["note"],
-            "price": float(row["price"]),
             "is_favorite": row["is_favorite"] in ["True", "true", "1"],
+            "items": [],
         }
-        context.resp = requests.post(
-            f"{rest_endpoint}/{wishlist_id}/items", json=payload, timeout=WAIT_TIMEOUT
-        )
+
+        context.resp = requests.post(rest_endpoint, json=payload, timeout=WAIT_TIMEOUT)
+        if context.resp.status_code != HTTP_201_CREATED:
+            print("POST Error:", context.resp.status_code, context.resp.json())
         expect(context.resp.status_code).equal_to(HTTP_201_CREATED)

@@ -67,7 +67,7 @@ $(function () {
     // WISHLIST //
 
     // Retrieve a Wishlist
-    $("#wishlist_retrieve_btn").click(function () {
+    $("#wishlist_retrieve-btn").click(function () {
 
         let wishlist_id = $("#wishlist_id").val();
 
@@ -94,7 +94,7 @@ $(function () {
     });
 
     // Create a Wishlist
-    $("#wishlist_create_btn").click(function () {
+    $("#wishlist_create-btn").click(function () {
 
         let name = $("#wishlist_name").val();
         let note = $("#wishlist_note").val();
@@ -120,7 +120,7 @@ $(function () {
         ajax.done(function(res){
             //alert(res.toSource())
             update_wishlist_data(res)
-            flash_message("Success: Create a Wishlist")
+            flash_message("Success")
         });
 
         ajax.fail(function(res){
@@ -131,7 +131,7 @@ $(function () {
     });
 
     // Update the Wishlist
-    $("#wishlist_update_btn").click(function () {
+    $("#wishlist_update-btn").click(function () {
         let wishlist_id = $("#wishlist_id").val();
         let name = $("#wishlist_name").val();
         let note = $("#wishlist_note").val();
@@ -163,7 +163,7 @@ $(function () {
 
         ajax.done(function(res){
             update_wishlist_data(res)
-            flash_message("Success: Update the Wishlist")
+            flash_message("Success")
         });
 
         ajax.fail(function(res){
@@ -174,7 +174,7 @@ $(function () {
     });
 
     // Clear the wishlist interface
-    $("#wishlist_clear_int_btn").click(function () {
+    $("#wishlist_clear_int-btn").click(function () {
         $("#wishlist_id").val("");
         $("#flash_message").empty();
         clear_form_data();
@@ -183,7 +183,7 @@ $(function () {
     // Search for a WL
     // ****************************************
 
-    $("#wishlist_search_btn").click(function () {
+    $("#wishlist_search-btn").click(function () {
 
         let name = $("#wishlist_name").val();
         let category = $("#pet_category").val();
@@ -239,7 +239,7 @@ $(function () {
     // Delete a Wishlist
     // ****************************************
 
-    $("#wishlist_delete_btn").click(function () {
+    $("#wishlist_delete-btn").click(function () {
 
         let id = $("#wishlist_id").val();
 
@@ -265,7 +265,7 @@ $(function () {
     // ITEM //
 
     // CREATE an Item in the wishlist
-    $("#item_create_btn").click(function () {
+    $("#item_create-btn").click(function () {
         let name = $("#item_name").val();
         let category = $("#item_category").val();
         let quantity = $("#item_quantity").val();
@@ -295,7 +295,7 @@ $(function () {
         ajax.done(function(res){
             //alert(res.toSource())
             update_item_data(res)
-            flash_message("Success: Create an Item")
+            flash_message("Success")
         });
 
         ajax.fail(function(res){
@@ -306,7 +306,7 @@ $(function () {
     });
 
     // UPDATE an Item in the wishlist
-    $("#item_update_btn").click(function () {
+    $("#item_update-btn").click(function () {
         let item_id = $("#item_id").val();
         let name = $("#item_name").val();
         let category = $("#item_category").val();
@@ -337,7 +337,7 @@ $(function () {
         ajax.done(function(res){
             //alert(res.toSource())
             update_item_data(res)
-            flash_message("Success: Update an Item")
+            flash_message("Success")
         });
 
         ajax.fail(function(res){
@@ -348,7 +348,7 @@ $(function () {
     });
 
     // LIST items in the wishlist
-    $("#item_search_btn").click(function () {
+    $("#item_search-btn").click(function () {
 
         let I_name = $("#item_name").val();
         let wish_id = $("#desired_item_wishlist").val();
@@ -427,7 +427,7 @@ $(function () {
     });
 
     // DELETE items in the wishlist
-    $("#item_delete_btn").click(function () {
+    $("#item_delete-btn").click(function () {
 
         let id = $("#item_id").val();
         let wishlist_id = $("#desired_item_wishlist").val();
@@ -452,7 +452,7 @@ $(function () {
     });
 
     // QUERY all the items in different wishlists
-    $("#item_query_btn").click(function () {
+    $("#item_query-btn").click(function () {
         let name = $("#item_name").val();
         let category = $("#item_category").val();
         let quantity = $("#item_quantity").val();
@@ -491,13 +491,13 @@ $(function () {
     });
     
      // CLEAR the items interface
-     $("#item_clear_int_btn").click(function () {
+     $("#item_clear-btn").click(function () {
         $("#item_id").val("");
         $("#flash_message").empty();
         clear_form_data();
     });
 
-    $("#item_search_btn").click(function () {
+    $("#item_search-btn").click(function () {
         let wishlist_id = $("#wishlist_id").val(); 
         let category = $("#item_category").val(); 
         let price = $("#item_price").val();  
