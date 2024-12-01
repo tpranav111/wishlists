@@ -66,12 +66,17 @@ def list_wishlists():
     wls = []
 
     is_favorite = request.args.get("is_favorite")
+    name = request.args.get("name")
     # Parse any arguments from the query string
     if is_favorite:
         app.logger.info("Find by is_favorite: %s", is_favorite)
         # create bool from string
         is_favorite_value = is_favorite.lower() in ["true", "yes", "1"]
         wls = Wishlist.find_by_favorite(is_favorite_value)
+    elif name:
+        app.logger.info("Find by name: %s", name)
+        name_value = name
+        wls = Wishlist.find_by_name(name_value)
     else:
         app.logger.info("Find all")
         wls = Wishlist.all()
@@ -503,7 +508,6 @@ def cancel_wishlist_favorite(wishlist_id):
     app.logger.info("Wishlist [%s] canceled as favorite", wishlist_id)
 
     return jsonify(wishlist.serialize()), status.HTTP_200_OK
-
 
 
 # search item using query str
