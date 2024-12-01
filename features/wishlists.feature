@@ -21,7 +21,7 @@ Feature: The wishlists service back-end
         And I press the "Wishlist_Clear" button
         And I set the "Name" to "James"
         And I press the "Wishlist_Search" button
-        #Then I should see the message "Success"
+        Then I should see the message "Success"
         When I copy the "ID" field
         And I press the "Wishlist_Clear" button
         Then the "ID" field should be empty
@@ -29,7 +29,7 @@ Feature: The wishlists service back-end
         And the "Note" field should be empty
         When I paste the "ID" field
         And I press the "Wishlist_Retrieve" button
-        #Then I should see the message "Success"
+        Then I should see the message "Success"
         And I should see "James" in the "Name" field
         And I should see "wl1" in the "Note" field
         And I should see "False" in the "Favorite" dropdown
@@ -39,13 +39,22 @@ Feature: The wishlists service back-end
         When I visit the "Home Page"
         And I press the "Wishlist_Clear" button
         And I press the "Wishlist_Search" button
-        #Then I should see the message "Success"
+        Then I should see the message "Success"
         And I should see "wl1" in the results
         And I should see "wl2" in the results
         And I should see "wl3" in the results
         And I should see "wl4" in the results
         And I should not see "wl5" in the results
 
+    Scenario: Search by Name
+        When I visit the "Home Page"
+        And I press the "Wishlist_Clear" button
+        And I set the "Name" to "Eric"
+        And I press the "Wishlist_Search" button
+        Then I should see the message "Success"
+        And I should see "wl2" in the results
+        And I should not see "wl1" in the results
+        
     Scenario: Create a Wishlist
         When I visit the "Home Page"
         And I set the "Name" to "Alice"
@@ -53,7 +62,7 @@ Feature: The wishlists service back-end
         And I select "True" in the "Favorite" dropdown
         And I set the "Update" to "2022-09-19"
         And I press the "Wishlist_Create" button
-        #Then I should see the message "Success"
+        Then I should see the message "Success"
         When I copy the "ID" field
         And I press the "Wishlist_Clear" button
         Then the "ID" field should be empty
@@ -61,7 +70,7 @@ Feature: The wishlists service back-end
         And the "Note" field should be empty
         When I paste the "ID" field
         And I press the "Wishlist_Retrieve" button
-        #Then I should see the message "Success"
+        Then I should see the message "Success"
         And I should see "Alice" in the "Name" field
         And I should see "wl5" in the "Note" field
         And I should see "True" in the "Favorite" dropdown
@@ -72,23 +81,23 @@ Feature: The wishlists service back-end
         And I press the "Wishlist_Clear" button
         And I set the "Name" to "James"
         And I press the "Wishlist_Search" button
-        #Then I should see the message "Success"
+        Then I should see the message "Success"
         And I should see "James" in the "Name" field
         And I should see "wl1" in the "Note" field
         And I should see "False" in the "Favorite" dropdown
         And I should see "2019-11-18" in the "Update" field
         When I change "Note" to "Updated Note"
         And I press the "Wishlist_Update" button
-        #Then I should see the message "Success"
+        Then I should see the message "Success"
         When I copy the "ID" field
         And I press the "Wishlist_Clear" button
         And I paste the "ID" field
         And I press the "Wishlist_Retrieve" button
-        #Then I should see the message "Success"
+        Then I should see the message "Success"
         And I should see "Updated Note" in the "Note" field
         When I press the "Wishlist_Clear" button
         And I press the "Wishlist_Search" button
-        #Then I should see the message "Success"
+        Then I should see the message "Success"
         And I should see "Updated Note" in the wishlist results
         And I should not see "wl1" in the wishlist results
 
@@ -97,7 +106,7 @@ Feature: The wishlists service back-end
         And I press the "Wishlist_Clear" button
         And I set the "Name" to "James"
         And I press the "Wishlist_Search" button
-        #Then I should see the message "Success"
+        Then I should see the message "Success"
         And I should see "James" in the "Name" field
         And I should see "wl1" in the "Note" field
         And I should see "False" in the "Favorite" dropdown
@@ -112,11 +121,3 @@ Feature: The wishlists service back-end
         And I press the "Wishlist_Retrieve" button
         Then I should see the message "404 Not Found"
 
-    Scenario: Search by Name
-        When I visit the "Home Page"
-        And I press the "Wishlist_Clear" button
-        And I set the "Name" to "Eric"
-        And I press the "Wishlist_Search" button
-        #Then I should see the message "Success"
-        And I should see "wl2" in the results
-        And I should not see "wl1" in the results

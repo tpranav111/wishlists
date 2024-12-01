@@ -27,6 +27,13 @@ $(function () {
         $("#wishlist_update").val("");
     }
 
+    //Clear the wishlist
+    $("#wishlist_clear-btn").click(function () {
+        $("#wishlist_id").val("");
+        $("#flash_message").empty();
+        clear_wishlist_data()
+    });
+
     // Updates the form with data from the response
     function update_item_data(res) {
         $("#item_id").val(res.id);
@@ -189,11 +196,16 @@ $(function () {
         let category = $("#pet_category").val();
         let available = $("#pet_available").val() == "true";
 
+        let queryString = "";
+        if (name) {
+            queryString += 'name=' + name
+        }
+
         $("#flash_message").empty();
 
         let ajax = $.ajax({
             type: "GET",
-            url: `/wishlists`,
+            url: `/wishlists?${queryString}`,
             contentType: "application/json",
             data: ''
         })
