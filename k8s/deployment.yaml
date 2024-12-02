@@ -5,12 +5,12 @@ metadata:
   labels:
     app: wishlists
 spec:
-  replicas: 1 #2?
+  replicas: 2
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 2 #0%
-      maxUnavailable: 0 #50%
+      maxSurge: 0%
+      maxUnavailable: 50%
   selector:
     matchLabels:
       app: wishlists
@@ -28,22 +28,14 @@ spec:
         - containerPort: 8080
           protocol: TCP
         env:
-       #- name: RETRY_COUNT
-         #value: "10"
+        - name: RETRY_COUNT
+          value: "10"
         - name: DATABASE_URI
-          value: "sqlite:///memory:" #valueFrom: 
-           #secretKeyRef:
-             #name: postgres-cred#s
-             #key: database_uri  
+          valueFrom: 
+            secretKeyRef:
+              name: postgres-creds
+              key: database_uri  
         
-      # not sure if we need Liveness Probe to check the application is alive?
-       #livenessProbe:
-         #httpGet:
-           #path: /health
-           #port: 8080
-         #initialDelaySeconds: 15
-         #periodSeconds: 20
-
         readinessProbe:
           initialDelaySeconds: 10
           periodSeconds: 60
@@ -58,4 +50,3 @@ spec:
             cpu: "0.25"
             memory: "64Mi"
 
-# for PostgreSQL needed to be changed
