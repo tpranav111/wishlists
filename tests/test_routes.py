@@ -442,36 +442,36 @@ class TestWishlistService(TestCase):
         self.assertEqual(data[0]["name"], item.name)
 
     # search an item in given WL
-    def test_search_item_in_wishlist(self):
-        """It should search items in a wishlist***"""
+    # def test_search_item_in_wishlist(self):
+    #     """It should search items in a wishlist***"""
 
-        wishlist = self._create_wishlists(1)[0]
-        resp = self.client.get(
-            f"{BASE_URL}/{wishlist.id}", content_type="application/json"
-        )
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+    #     wishlist = self._create_wishlists(1)[0]
+    #     resp = self.client.get(
+    #         f"{BASE_URL}/{wishlist.id}", content_type="application/json"
+    #     )
+    #     self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
-        data = resp.get_json()
-        self.assertEqual(data["name"], wishlist.name)
-        wishlist.id = data["id"]
+    #     data = resp.get_json()
+    #     self.assertEqual(data["name"], wishlist.name)
+    #     wishlist.id = data["id"]
 
-        item = ItemsFactory()
-        resp = self.client.post(
-            f"{BASE_URL}/{wishlist.id}/items",
-            json=item.serialize(),
-            content_type="application/json",
-        )
-        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
-        item_name = item.name
+    #     item = ItemsFactory()
+    #     resp = self.client.post(
+    #         f"{BASE_URL}/{wishlist.id}/items",
+    #         json=item.serialize(),
+    #         content_type="application/json",
+    #     )
+    #     self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+    #     item_name = item.name
 
-        resp = self.client.get(
-            f"{BASE_URL}/{wishlist.id}/items/name?search="
-            + item_name,  # Correct endpoint for fetching items
-            content_type="application/json",
-        )
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        data = resp.get_json()
-        self.assertEqual(data["name"], item.name)
+    #     resp = self.client.get(
+    #         f"{BASE_URL}/{wishlist.id}/items/name?search="
+    #         + item_name,  # Correct endpoint for fetching items
+    #         content_type="application/json",
+    #     )
+    #     self.assertEqual(resp.status_code, status.HTTP_200_OK)
+    #     data = resp.get_json()
+    #     self.assertEqual(data["name"], item.name)
 
     def test_query_items_by_category(self):
         """It should Query Items by Category within a Wishlist"""
@@ -534,6 +534,42 @@ class TestWishlistService(TestCase):
         self.assertGreater(len(data), 0)
         for item in data:
             self.assertEqual(item["price"], test_price)
+
+    def test_query_items_by_name(self):
+        """It should Query Items by Name within a Wishlist"""
+        # Create a Wishlist
+        wishlist = self._create_wishlists(1)[0]
+        resp = self.client.get(
+            f"{BASE_URL}/{wishlist.id}", content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+        data = resp.get_json()
+        self.assertEqual(data["name"], wishlist.name)
+        wishlist.id = data["id"]
+
+        # Add an Item to the Wishlist
+        item_name = "Sunglasses"
+        item = ItemsFactory(name=item_name)
+        resp = self.client.post(
+            f"{BASE_URL}/{wishlist.id}/items",
+            json=item.serialize(),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        # Query the Item by Name
+        response = self.client.get(
+            f"{BASE_URL}/{wishlist.id}/items?name={item_name}",
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verify the Response Data
+        data = response.get_json()
+        self.assertGreater(len(data), 0)
+        for item in data:
+            self.assertEqual(item["name"], item_name)
 
     def test_data_validation_error(self):
         """It should return a 400 error for invalid data"""

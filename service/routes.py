@@ -26,6 +26,7 @@ from flask import jsonify, request, abort, url_for
 from flask import current_app as app  # Import Flask application
 from service.models import Wishlist, Items
 from service.common import status  # HTTP Status Codes
+from service.models import db  # or wherever db is initialized
 
 
 ######################################################################
@@ -49,12 +50,7 @@ def health_check():
 @app.route("/")
 def index():
     """Root URL response"""
-    return (
-        """Wishlists REST API Service: The Wishlists service allows users to save items they are
-            interested in but not yet ready to purchase. You can access details about wishlists
-            (/wishlists) and items ((/wishlists/ { wishlist_id }/items)) within each wishlist.""",
-        status.HTTP_200_OK,
-    )
+    return app.send_static_file("index.html")
     # return app.send_static_file("index.html")
 
 
@@ -70,12 +66,17 @@ def list_wishlists():
     wls = []
 
     is_favorite = request.args.get("is_favorite")
+    name = request.args.get("name")
     # Parse any arguments from the query string
     if is_favorite:
         app.logger.info("Find by is_favorite: %s", is_favorite)
         # create bool from string
         is_favorite_value = is_favorite.lower() in ["true", "yes", "1"]
         wls = Wishlist.find_by_favorite(is_favorite_value)
+    elif name:
+        app.logger.info("Find by name: %s", name)
+        name_value = name
+        wls = Wishlist.find_by_name(name_value)
     else:
         app.logger.info("Find all")
         wls = Wishlist.all()
@@ -341,16 +342,30 @@ def get_all_items(wishlist_id):
     """
     Get all Items in WL
     """
+    item_name = request.args.get("name", default=None)
     category = request.args.get("category")
     price = request.args.get("price", type=float)
     is_favorite = request.args.get("is_favorite")
     app.logger.info("Request to create an Item for Wishlist with id: %s", wishlist_id)
     wishlist = Wishlist.find(wishlist_id)
+    items = wishlist.items
     if not wishlist:
         abort(
             status.HTTP_404_NOT_FOUND,
             f"Wishlist with id '{wishlist_id}' could not be found.",
         )
+    if item_name:
+        app.logger.info("Searching for item by name: %s", item_name)
+        # Convert `items` to a list of serialized dictionaries temporarily for name filtering
+        filtered_items = [
+            item.serialize() for item in items if item.name.lower() == item_name.lower()
+        ]
+        if not filtered_items:
+            abort(
+                status.HTTP_404_NOT_FOUND,
+                f"Item with name '{item_name}' could not be found in Wishlist with id '{wishlist_id}'.",
+            )
+
     if category:
         app.logger.info("Filtering by category: %s", category)
         items = Items.find_by_category(wishlist_id=wishlist_id, category=category)
@@ -518,3 +533,47 @@ def search_items(wishlist_id):
         status.HTTP_404_NOT_FOUND,
         f"Item '{item_name}' could not be found in id '{wishlist_id}'  :(",
     )
+
+
+# Set a new route to make query for the items that match the query attributes
+@app.route("/items", methods=["GET"])
+def query_all_items():
+    """
+    Query items across all wishlists by multiple attributes.
+    """
+    # Extract query parameters
+    filters = {
+        "name": request.args.get("name"),
+        "category": request.args.get("category"),
+        "price": request.args.get("price", type=float),
+        "updated_time": request.args.get("updated_time"),
+        "is_favorite": request.args.get(
+            "is_favorite", type=lambda x: x.lower() in ["true", "1", "yes"]
+        ),
+    }
+
+    app.logger.info("Querying items with filters: %s", filters)
+
+    # Start making the query
+    query = db.session.query(Items)
+
+    # Apply the filters for the query
+    if filters["name"]:
+        query = query.filter(Items.name.ilike(f"%{filters['name']}%"))
+    if filters["category"]:
+        query = query.filter(Items.category.ilike(f"%{filters['category']}%"))
+    if filters["price"] is not None:
+        query = query.filter(Items.price == filters["price"])
+    if filters["updated_time"]:
+        query = query.join(Wishlist).filter(
+            Wishlist.updated_time == filters["updated_time"]
+        )
+    if filters["is_favorite"] is not None:
+        query = query.filter(Items.is_favorite == filters["is_favorite"])
+
+    items = query.all()
+
+    results = [item.serialize() for item in items]
+
+    app.logger.info("Found %d items with the provided filters", len(results))
+    return jsonify(results), status.HTTP_200_OK
