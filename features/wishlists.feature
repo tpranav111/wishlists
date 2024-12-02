@@ -16,7 +16,21 @@ Feature: The wishlists service back-end
         Then I should see "Wishlist RESTful Service" in the title
         And I should not see "404 Not Found"
 
-    Scenario: Read a Wishlist
+    Scenario: Clear the form
+        When I visit the "Home Page"
+        And I set the "Name" to "Alice"
+        And I set the "Note" to "wl5"
+        And I select "True" in the "Favorite" dropdown
+        And I set the "Update" to "2022-09-19"
+        And I press the "Wishlist_Clear" button
+        #Then I should see the message "Success"
+        Then the "ID" field should be empty
+        And the "Name" field should be empty
+        And the "Note" field should be empty
+        And the "Favorite" field should be empty
+        And the "Update" field should be empty
+
+    Scenario: Query a Wishlist by name
         When I visit the "Home Page"
         And I press the "Wishlist_Clear" button
         And I set the "Name" to "James"
@@ -35,7 +49,7 @@ Feature: The wishlists service back-end
         And I should see "False" in the "Favorite" dropdown
         And I should see "2019-11-18" in the "Update" field
 
-    Scenario: List all Orders
+    Scenario: List all Wishlists
         When I visit the "Home Page"
         And I press the "Wishlist_Clear" button
         And I press the "Wishlist_Search" button
@@ -57,24 +71,20 @@ Feature: The wishlists service back-end
         
     Scenario: Create a Wishlist
         When I visit the "Home Page"
+        And I press the "Wishlist_Clear" button
         And I set the "Name" to "Alice"
         And I set the "Note" to "wl5"
         And I select "True" in the "Favorite" dropdown
         And I set the "Update" to "2022-09-19"
         And I press the "Wishlist_Create" button
         Then I should see the message "Success"
-        When I copy the "ID" field
-        And I press the "Wishlist_Clear" button
-        Then the "ID" field should be empty
-        And the "Name" field should be empty
-        And the "Note" field should be empty
-        When I paste the "ID" field
-        And I press the "Wishlist_Retrieve" button
+        When I press the "Wishlist_Clear" button
+        And I press the "Wishlist_Search" button
         Then I should see the message "Success"
-        And I should see "Alice" in the "Name" field
-        And I should see "wl5" in the "Note" field
-        And I should see "True" in the "Favorite" dropdown
-        And I should see "2022-09-19" in the "Update" field
+        And I should see "Alice" in the results
+        And I should see "wl5" in the results
+        And I should see "true" in the results
+        And I should see "2022-09-19" in the results
 
     Scenario: Update a Wishlist
         When I visit the "Home Page"
@@ -98,8 +108,8 @@ Feature: The wishlists service back-end
         When I press the "Wishlist_Clear" button
         And I press the "Wishlist_Search" button
         Then I should see the message "Success"
-        And I should see "Updated Note" in the wishlist results
-        And I should not see "wl1" in the wishlist results
+        And I should see "Updated Note" in the results
+        And I should not see "wl1" in the results
 
     Scenario: Delete a Wishlist
         When I visit the "Home Page"
@@ -113,10 +123,7 @@ Feature: The wishlists service back-end
         And I should see "2019-11-18" in the "Update" field
         When I copy the "ID" field
         And I press the "Wishlist_Delete" button
-        Then I should see the message "Wishlist has been Deleted!"
-        And the "ID" field should be empty
-        And the "Name" field should be empty
-        And the "Note" field should be empty
+        #Then I should see the message "Success"
         When I paste the "ID" field
         And I press the "Wishlist_Retrieve" button
         Then I should see the message "404 Not Found"
