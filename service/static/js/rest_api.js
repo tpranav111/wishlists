@@ -15,7 +15,10 @@ $(function () {
         } else {
             $("#wishlist_favorite").val("false");
         }
-        $("#wishlist_update").val(res.updated_time);
+        // make updated_time to date struct
+        let date = new Date(res.updated_time);
+        let formattedDate = date.toISOString().split('T')[0]; // extract YYYY-MM-DD part
+        $("#wishlist_update").val(formattedDate);
     }
 
     // Clears all form fields
@@ -95,7 +98,7 @@ $(function () {
 
         ajax.fail(function(res){
             clear_wishlist_data()
-            flash_message(res.responseJSON.message)
+            flash_message("404 Not Found")
         });
 
     });
@@ -118,7 +121,7 @@ $(function () {
             data: JSON.stringify({
                 name: name,
                 note: note,
-                updated_time: update,
+                updated_time: new Date(update).toISOString(),
                 items: [],
                 is_favorite: is_favorite
             })
@@ -162,7 +165,7 @@ $(function () {
             data: JSON.stringify({
                 name: name,
                 note: note,
-                updated_time: update,
+                updated_time: new Date(update).toISOString(),
                 items: [],
                 is_favorite: is_favorite
             })
@@ -225,7 +228,9 @@ $(function () {
             
             for(let i = 0; i < res.length; i++) {
                 let WL = res[i];
-                table +=  `<tr id="row_${i}"><td>${WL.id}</td><td>${WL.name}</td><td>${WL.note}</td><td>${WL.is_favorite}</td><td>${WL.updated_time}</td><td>`;
+                let date = new Date(WL.updated_time);
+                let formattedDate = date.toISOString().split('T')[0];
+                table +=  `<tr id="row_${i}"><td>${WL.id}</td><td>${WL.name}</td><td>${WL.note}</td><td>${WL.is_favorite}</td><td>${formattedDate}</td><td>`;
                 if (i == 0) {
                     firstWL = WL;
                 }
@@ -264,9 +269,10 @@ $(function () {
             data: '',
         })
 
-        ajax.done(function(res){
-            clear_form_data()
-            flash_message("Success")
+        ajax.done(function(res) {
+            console.log("Delete response:", res);
+            clear_form_data();
+            flash_message("Wishlist deleted successfully!");
         });
 
         ajax.fail(function(res){
