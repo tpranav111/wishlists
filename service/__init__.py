@@ -40,8 +40,11 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(config)
 
-    # Turn off strict slashes because it violates best practices
-    app.url_map.strict_slashes = False
+    # Initialize Plugins
+    # pylint: disable=import-outside-toplevel
+    from service.models import db
+
+    db.init_app(app)
 
     ######################################################################
     # Configure Swagger before initializing it
@@ -59,20 +62,16 @@ def create_app():
         prefix="/api",
     )
 
-    # Initialize Plugins
-    # pylint: disable=import-outside-toplevel
-    from service.models import db
-
-    db.init_app(app)
-
     with app.app_context():
         # Dependencies require we import the routes AFTER the Flask app is created
         # pylint: disable=wrong-import-position, wrong-import-order, unused-import
-        from service import routes  # noqa: F401 E402
+        from service import (
+            routes,
+            models,
+        )  # noqa: F401 E402 # pylint: disable=cyclic-import
         from service.common import error_handlers, cli_commands  # noqa: F401, E402
 
         try:
-            # db.drop_all()
             db.create_all()
         except Exception as error:  # pylint: disable=broad-except
             app.logger.critical("%s: Cannot continue", error)
