@@ -63,7 +63,9 @@ def health_check():
 ######################################################################
 # GET INDEX
 ######################################################################
-@app.route("/")
+api.route("/")
+
+
 def index():
     """Root URL response"""
     return app.send_static_file("index.html")
@@ -525,8 +527,8 @@ class ItemCollection(Resource):
 ######################################################################
 
 
-@app.route("/wishlists/<int:wishlist_id>/items/<int:item_id>/favorite")
-@app.param("")
+@api.route("/wishlists/<int:wishlist_id>/items/<int:item_id>/favorite")
+@api.param("")
 class ItemMarkFavoriteResource(Resource):
     @api.doc("mark_items_favorite")
     @api.response(404, "Items favorite not marked")
@@ -587,8 +589,8 @@ class ItemMarkFavoriteResource(Resource):
         return item.serialize(), status.HTTP_200_OK
 
 
-@app.route("/wishlists/<int:wishlist_id>/items/favorite")
-@app.param("")
+@api.route("/wishlists/<int:wishlist_id>/items/favorite")
+@api.param("")
 class WishlistMarkFavoriteResource(Resource):
     @api.doc("mark_items_favorite")
     @api.response(404, "Wishlists favorite marked")
@@ -643,8 +645,8 @@ class WishlistMarkFavoriteResource(Resource):
         return wishlist.serialize(), status.HTTP_200_OK
 
 
-@app.route("/items")
-@app.param("")
+@api.route("/items")
+@api.param("")
 class ItemsQueryResource(Resource):
     @api.doc("query_items_attributes")
     @api.response(404, "Items attribute does not exist")
