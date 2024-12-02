@@ -54,18 +54,10 @@ def health_check():
     return jsonify(status=200, message="Healthy"), status.HTTP_200_OK
 
 
-# or
-# @app.route("/health", methods=["GET"])
-# def health():
-#    """Health check endpoint: Let them know our heart is still beating"""
-#    app.logger.info("Health check endpoint called")
-#    return jsonify({"status": "OK"}), status.HTTP_200_OK
 ######################################################################
 # GET INDEX
 ######################################################################
-api.route("/")
-
-
+@app.route("/")
 def index():
     """Root URL response"""
     return app.send_static_file("index.html")
