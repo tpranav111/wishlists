@@ -467,7 +467,7 @@ class ItemResource(Resource):
     # ------------------------------------------------------------------
     # UPDATE AN ITEM
     # ------------------------------------------------------------------
-    @api.doc("update_items", security="apikey")
+    @api.doc("update_items")
     @api.response(404, "Item not found")
     @api.response(400, "The posted Item data was not valid")
     @api.expect(item_model)
@@ -502,7 +502,7 @@ class ItemResource(Resource):
     # ------------------------------------------------------------------
     # DELETE AN ITEM
     # ------------------------------------------------------------------
-    @api.doc("delete_items", security="apikey")
+    @api.doc("delete_items")
     @api.response(204, "Item deleted")
     def delete(self, wishlist_id, item_id):
         """
@@ -616,11 +616,11 @@ class ItemMarkFavoriteResource(Resource):
         return item.serialize(), status.HTTP_200_OK
 
 
-@api.route("/wishlists/<int:wishlist_id>/items/favorite")
+@api.route("/wishlists/<int:wishlist_id>/favorite")
 @api.param("")
 class WishlistMarkFavoriteResource(Resource):
     @api.doc("mark_items_favorite")
-    @api.response(404, "Wishlists favorite marked")
+    @api.response(404, "Wishlists favorite not marked")
     def put(self, wishlist_id):
         """
         Mark an item as favorite in a wishlist
