@@ -497,7 +497,7 @@ class ItemResource(Resource):
             abort(status.HTTP_400_BAD_REQUEST, "Cannot update item with empty ID.")
 
         item.update()
-        return jsonify(item.serialize()), 200
+        return item, status.HTTP_200_OK
 
     # ------------------------------------------------------------------
     # DELETE AN ITEM
@@ -541,7 +541,7 @@ class ItemResource(Resource):
                 f"Wishlist with id '{item_id}' could not be found.",
             )
 
-        return jsonify(item.serialize()), status.HTTP_200_OK
+        return item, status.HTTP_200_OK
 
 
 ######################################################################
