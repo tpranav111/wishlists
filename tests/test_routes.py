@@ -32,7 +32,7 @@ from .factories import WishlistFactory, ItemsFactory
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
 )
-BASE_URL = "/wishlists"
+BASE_URL = "/api/wishlists"
 
 
 ######################################################################

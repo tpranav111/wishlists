@@ -133,6 +133,9 @@ class Items(db.Model, PersistentBase):
             cls.wishlist_id == wishlist_id, cls.is_favorite == is_favorite
         )
 
+    # The following code will cause errors for the Items RestAPI
+
+    """
     @classmethod
     def query(cls, **kwargs):
         logger.info("Querying items with filters: %s", kwargs)
@@ -150,3 +153,4 @@ class Items(db.Model, PersistentBase):
             query = query.filter(cls.is_favorite == kwargs["is_favorite"])
 
         return query.all()
+    """

@@ -38,7 +38,8 @@ DELETE /wishlists/{id} - deletes a Wishlist record in the database
 
 from flask import jsonify, request, abort, url_for
 from flask import current_app as app  # Import Flask application
-from flask_restx import Resource, fields, reqparse, inputs
+from flask_restx import Resource, fields, reqparse, inputs, Model
+from datetime import datetime
 from service.models import Wishlist, Items
 from service.common import status  # HTTP Status Codes
 from service.models import db  # or wherever db is initialized
@@ -74,13 +75,17 @@ create_item_model = api.model(
         "category": fields.String(
             required=False, description="The category of the item"
         ),
-        "price": fields.Float(required=False, description="The price of the item"),
+        "price": fields.Float(
+            required=False, description="The price of the item (Floating Points)"
+        ),
         "quantity": fields.Integer(
-            required=True, description="The quantity of the items"
+            required=True, description="The quantity of the items (Integers)"
         ),
         "is_favorite": fields.Boolean(
-            required=False, description="Is the item marked as favorite?"
+            required=False,
+            description="Is the item marked as favorite? (Choose YES or NO)",
         ),
+        "note": fields.String(required=False, description="Notes for the Items"),
         "wishlist_id": fields.Integer(
             required=True, description="The ID of the wishlist this item belongs to"
         ),
@@ -95,6 +100,9 @@ item_model = api.inherit(
 )
 
 ##
+"""
+
+"""
 create_wishlist_model = api.model(
     "Wishlist",
     {
@@ -103,11 +111,14 @@ create_wishlist_model = api.model(
             required=True, description="The category of the wishlist"
         ),
         "is_favorite": fields.Boolean(
-            required=True, description="Is the wishlist marked as favorite?"
+            required=True,
+            description="Is the wishlist marked as favorite? (Choose YES or NO)",
         ),
-        "updated_time": fields.DateTime(
-            description="The last time the wishlist was updated"
+        "updated_time": fields.String(
+            required=False,
+            description="The last updated timestamp (%a, %d %b %Y %H:%M:%S GMT) -> Example : Tue, 03 Dec 2024 15:18:50 GMT",
         ),
+        "note": fields.String(required=False, description="Notes for the Wishlist"),
         "items": fields.List(fields.Nested(item_model), description="List of items"),
     },
 )
@@ -155,6 +166,28 @@ item_args.add_argument(
 )
 
 
+######################################################################
+# Checks the ContentType of a request
+######################################################################
+def check_content_type(content_type) -> None:
+    """Checks that the media type is correct"""
+    if "Content-Type" not in request.headers:
+        app.logger.error("No Content-Type specified.")
+        abort(
+            status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            f"Content-Type must be {content_type}",
+        )
+
+    if request.headers["Content-Type"] == content_type:
+        return
+
+    app.logger.error("Invalid Content-Type: %s", request.headers["Content-Type"])
+    abort(
+        status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+        f"Content-Type must be {content_type}",
+    )
+
+
 # WISHLIST PART
 
 
@@ -194,7 +227,7 @@ class WishlistCollection(Resource):
         results = [wl.serialize() for wl in wls]
         app.logger.info("Returning %d WLs", len(results))
 
-        return jsonify(results), status.HTTP_200_OK
+        return results, status.HTTP_200_OK
 
     # ------------------------------------------------------------------
     # ADD A NEW WISHLIST
@@ -222,7 +255,9 @@ class WishlistCollection(Resource):
         wishlist.create()
         app.logger.info("Wishlist with new id [%s] saved!", wishlist.id)
 
-        location_url = url_for("get_wishlists", wishlist_id=wishlist.id, _external=True)
+        location_url = url_for(
+            "wishlist_resource", wishlist_id=wishlist.id, _external=True
+        )
 
         return (
             wishlist.serialize(),
@@ -360,7 +395,7 @@ class ItemCollection(Resource):
 
         # Send the location to GET the new item
         location_url = url_for(
-            "get_items", wishlist_id=wishlist.id, item_id=item.id, _external=True
+            "item_resource", wishlist_id=wishlist.id, item_id=item.id, _external=True
         )
         return message, status.HTTP_201_CREATED, {"Location": location_url}
 
@@ -427,7 +462,7 @@ class ItemCollection(Resource):
 ######################################################################
 @api.route("/wishlists/<int:wishlist_id>/items/<int:item_id>")
 @api.param("item_id", "The Item identifier")
-class ItemCollection(Resource):
+class ItemResource(Resource):
 
     # ------------------------------------------------------------------
     # UPDATE AN ITEM
@@ -488,7 +523,7 @@ class ItemCollection(Resource):
     @api.doc("get_items")
     @api.response(404, "Item not found")
     @api.marshal_with(item_model)
-    def get(wishlist_id, item_id):
+    def get(self, wishlist_id, item_id):
         """
         Get an Item
 
@@ -637,15 +672,16 @@ class WishlistMarkFavoriteResource(Resource):
         return wishlist.serialize(), status.HTTP_200_OK
 
 
+"""
 @api.route("/items")
 @api.param("")
 class ItemsQueryResource(Resource):
     @api.doc("query_items_attributes")
     @api.response(404, "Items attribute does not exist")
     def get(self):
-        """
-        Query items across all wishlists by multiple attributes.
-        """
+        
+        # Query items across all wishlists by multiple attributes.
+        
         # Extract query parameters
         filters = {
             "name": request.args.get("name"),
@@ -682,3 +718,4 @@ class ItemsQueryResource(Resource):
 
         app.logger.info("Found %d items with the provided filters", len(results))
         return results, status.HTTP_200_OK
+"""
